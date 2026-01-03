@@ -1,0 +1,379 @@
+/*
+ * Akanyenyeri Redesign - Modern Magazine Style
+ * Features: Glassmorphism, Clean Typography, Micro-interactions
+ */
+
+/* --- 1. Global Variables & Reset Overrides --- */
+:root {
+    --font-heading: 'Crimson Text', serif;
+    --font-body: 'Inter', sans-serif;
+    
+    /* Refined Color Palette */
+    --color-primary: #0066cc; /* Slightly deeper blue */
+    --color-primary-rgb: 0, 102, 204;
+    --color-accent: #e63946; /* Vivid red for tags/breaking */
+    
+    --bg-body: #f8f9fa; /* Very subtle grey */
+    --bg-card: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.95);
+    
+    --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.05);
+    --shadow-hover: 0 20px 50px -12px rgba(0,0,0,0.1);
+    
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+}
+
+[data-theme="dark"] {
+    --bg-body: #0a0a0a;
+    --bg-card: #141414;
+    --bg-glass: rgba(20, 20, 20, 0.95);
+    --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.5);
+    --shadow-hover: 0 20px 50px -12px rgba(0,0,0,0.7);
+}
+
+body {
+    background-color: var(--bg-body);
+    font-family: var(--font-body);
+    overflow-x: hidden; /* Prevent horizontal scroll from animations */
+}
+
+/* --- 2. Glassmorphism Header --- */
+.site-header {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    box-shadow: none; /* Removed heavy shadow */
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+[data-theme="dark"] .site-header {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Hide top bar on scroll for cleaner look (JS can handle class 'scrolled') */
+/* For now, just style it nicely */
+.top-bar {
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.top-bar a {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.site-branding {
+    padding: 20px 0;
+}
+
+.site-title a {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(45deg, var(--color-primary), #00a8ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none; /* Clean look */
+}
+
+/* --- 3. Hero Section (Redesigned) --- */
+.enhanced-featured {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.main-featured-article {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-soft);
+    min-height: 600px; /* Taller hero */
+    transform: translateZ(0); /* Hardware accel */
+}
+
+.main-featured-img {
+    transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.main-featured-article:hover .main-featured-img {
+    transform: scale(1.08);
+}
+
+.main-featured-content {
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+    padding: 40px;
+}
+
+.main-featured-content h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 15px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s forwards 0.3s;
+}
+
+.main-featured-content .post-meta {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s forwards 0.5s;
+}
+
+/* Sidebar Cards in Hero */
+.featured-sidebar {
+    gap: 20px;
+    height: 600px;
+    overflow-y: auto; /* Allow scroll if content is long, or just fit */
+    scrollbar-width: none; /* Hide scrollbar */
+}
+
+.featured-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.featured-card:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: var(--shadow-hover);
+}
+
+.featured-card-img {
+    width: 90px;
+    height: 90px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+.featured-card-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.category-badge {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    padding: 4px 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* --- 4. Content Area & Cards --- */
+.site-content {
+    padding-top: 50px;
+}
+
+/* Article Cards (Grid Items) */
+.post-item {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.4s ease;
+    border: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-item:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-hover);
+}
+
+.post-img-wrap {
+    overflow: hidden;
+    position: relative;
+    padding-top: 60%; /* Aspect ratio */
+}
+
+.post-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.post-item:hover .post-img {
+    transform: scale(1.1);
+}
+
+.post-content {
+    padding: 25px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.post-excerpt {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.read-more-btn {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.read-more-btn i {
+    margin-left: 8px;
+    transition: transform 0.2s;
+}
+
+.read-more-btn:hover i {
+    transform: translateX(5px);
+}
+
+/* --- 5. Animations --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 6. Footer --- */
+.site-footer {
+    background: #111;
+    color: #fff;
+    padding: 80px 0 40px;
+    margin-top: 80px;
+}
+
+.footer-section h3, .footer-section h4 {
+    color: #fff;
+    margin-bottom: 25px;
+}
+
+.footer-links li a {
+    color: rgba(255,255,255,0.6);
+    transition: color 0.3s, padding-left 0.3s;
+}
+
+.footer-links li a:hover {
+    color: #fff;
+    padding-left: 10px;
+}
+
+/* --- 8. Sidebar & Widgets --- */
+.sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.sidebar-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    color: var(--text-header);
+}
+
+.sidebar-post {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.sidebar-post-image {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-sm);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.sidebar-post-title {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 5px;
+}
+
+.sidebar-post-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.category-card {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    border-left: 4px solid var(--color-primary);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s;
+}
+
+.category-card:hover {
+    transform: translateX(5px);
+}
+
+.category-count {
+    background: rgba(0,0,0,0.05);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+}
+
+/* --- 9. Responsive (continued) --- */
+@media (max-width: 992px) {
+    .enhanced-featured {
+        grid-template-columns: 1fr;
+    }
+    
+    .main-featured-article {
+        min-height: 450px;
+    }
+    
+    .featured-sidebar {
+        height: auto;
+        overflow: visible;
+    }
+    
+    .main-featured-content h2 {
+        font-size: 2rem;
+    }
+}

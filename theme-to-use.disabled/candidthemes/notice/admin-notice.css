@@ -1,0 +1,38 @@
+.rectified-pro-admin-notice {
+	position: relative;
+}
+
+.rectified-pro-admin-notice p {
+	font-size: 16px;
+}
+
+.rectified-pro-admin-notice code {
+	display: inline-block;
+}
+
+.rectified-pro-admin-notice .links {
+	margin: 12px 0;
+}
+
+.rectified-pro-admin-notice .links a {
+	height: auto;
+	padding: 3px 15px;
+	margin-left: 12px;
+	text-transform: uppercase;
+}
+
+.rectified-pro-admin-notice .links a .dashicons {
+	line-height: 1.2;
+}
+
+.rectified-pro-admin-notice .links a.button-primary {
+	margin-left: 0;
+}
+
+.rectified-pro-admin-notice  .rectified-pro-admin-notice-dismiss {
+	text-decoration: none;
+}
+.rectified-pro-admin-notice code, 
+.rectified-pro-admin-notice kbd{
+	font-weight: bold;
+}

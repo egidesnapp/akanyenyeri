@@ -1,0 +1,573 @@
+/* Akanyenyeri Magazine - Bootstrap 5 Custom Overrides */
+
+:root {
+    --bs-primary: #2b6cb0;
+    --bs-secondary: #f39c12;
+    --bs-danger: #e74c3c;
+    --bs-success: #27ae60;
+    --akany-dark: #1a202c;
+    --akany-light: #f8f9fa;
+}
+
+/* =====================================================
+   Typography & Fonts
+   ===================================================== */
+body {
+    font-family: 'Lato', sans-serif;
+    color: var(--akany-dark);
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}
+
+/* =====================================================
+   Navigation Bar
+   ===================================================== */
+.navbar {
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    color: var(--bs-primary) !important;
+    font-family: 'Playfair Display', serif;
+}
+
+.navbar-nav .nav-link {
+    margin: 0 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    color: var(--akany-dark) !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--bs-primary) !important;
+    border-bottom: 3px solid var(--bs-primary);
+}
+
+/* =====================================================
+   Header Section
+   ===================================================== */
+.bg-gradient {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #4a8fd8 100%) !important;
+}
+
+header h1 {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header p {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.25rem;
+}
+
+/* =====================================================
+   Main Content
+   ===================================================== */
+.site-content {
+    padding: 2rem 0;
+}
+
+/* =====================================================
+   Featured Posts
+   ===================================================== */
+.featured-container {
+    margin-bottom: 3rem;
+}
+
+.featured-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.featured-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+
+.featured-card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+}
+
+.featured-card h3 {
+    padding: 1.5rem;
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--bs-primary);
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+}
+
+/* =====================================================
+   Sidebar
+   ===================================================== */
+.sidebar-widget {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.sidebar-widget h5 {
+    color: var(--bs-primary);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--bs-secondary);
+    padding-bottom: 0.75rem;
+}
+
+.sidebar-widget ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-widget li {
+    margin-bottom: 0.75rem;
+}
+
+.sidebar-widget a {
+    color: var(--akany-dark);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: block;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.sidebar-widget a:hover {
+    color: var(--bs-primary);
+    background: var(--akany-light);
+    padding-left: 1rem;
+}
+
+/* =====================================================
+   Search Form
+   ===================================================== */
+.search-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-form input {
+    border: 2px solid #ecf0f1;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-form input:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+}
+
+.search-form button {
+    background: var(--bs-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-form button:hover {
+    background: #1e4a7a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+}
+
+/* =====================================================
+   Article Cards
+   ===================================================== */
+.article-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.article-card .card-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    overflow: hidden;
+}
+
+.article-card .card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.article-card:hover .card-img img {
+    transform: scale(1.05);
+}
+
+.article-card .card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.article-card .card-title {
+    font-size: 1.2rem;
+    color: var(--akany-dark);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.article-card .card-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.article-card .card-title a:hover {
+    color: var(--bs-primary);
+}
+
+.article-card .card-meta {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.article-card .card-text {
+    color: #5a5a5a;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+    flex-grow: 1;
+    line-height: 1.6;
+}
+
+/* =====================================================
+   Tags
+   ===================================================== */
+.tag-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #eef2ff 0%, #dfe8f5 100%);
+    color: var(--bs-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(43, 108, 176, 0.2);
+}
+
+.tag-badge:hover {
+    background: linear-gradient(135deg, #dfe8f5 0%, #c5d9f0 100%);
+    color: var(--bs-primary);
+    transform: scale(1.05);
+    border-color: var(--bs-primary);
+}
+
+/* =====================================================
+   Pagination
+   ===================================================== */
+.pagination {
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.page-link {
+    color: var(--bs-primary);
+    border-color: #ecf0f1;
+}
+
+.page-link:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+
+.page-item.active .page-link {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* =====================================================
+   Buttons
+   ===================================================== */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: #1e4a7a;
+    border-color: #1e4a7a;
+}
+
+/* =====================================================
+   Loading Spinner
+   ===================================================== */
+.spinner-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #ecf0f1;
+    border-top-color: var(--bs-primary);
+    border-right-color: var(--bs-secondary);
+    border-bottom-color: var(--bs-primary);
+    border-left-color: var(--bs-secondary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =====================================================
+   Footer
+   ===================================================== */
+footer {
+    background: var(--akany-dark) !important;
+}
+
+footer h5 {
+    color: white;
+    font-family: 'Playfair Display', serif;
+}
+
+footer a {
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--bs-secondary) !important;
+}
+
+footer .fab {
+    transition: all 0.3s ease;
+}
+
+footer .fab:hover {
+    transform: translateY(-4px);
+}
+
+/* =====================================================
+   Responsive
+   ===================================================== */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    header p {
+        font-size: 1rem;
+    }
+    
+    .featured-card img {
+        height: 180px;
+    }
+    
+    .article-card .card-img {
+        height: 160px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    header p {
+        font-size: 0.9rem;
+    }
+    
+    .featured-card h3 {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+    
+    .article-card .card-img {
+        height: 140px;
+    }
+}
+
+/* Single Post Page Styling */
+.post-detail {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.post-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.post-meta {
+    font-size: 0.95rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: #666;
+}
+
+.post-meta a {
+    color: var(--bs-primary);
+    text-decoration: none;
+}
+
+.post-meta a:hover {
+    text-decoration: underline;
+}
+
+.post-featured-image {
+    margin: 2rem 0;
+}
+
+.post-featured-image img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.post-content {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+.post-content h2,
+.post-content h3 {
+    font-family: 'Playfair Display', serif;
+    margin: 1.5rem 0 1rem;
+    color: #1a1a1a;
+}
+
+.post-content p {
+    margin-bottom: 1rem;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+
+.post-footer {
+    margin-top: 2rem;
+    padding-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .post-title {
+        font-size: 2rem;
+    }
+    
+    .post-detail {
+        padding: 1.5rem;
+    }
+    
+    .post-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Logo Styling */
+.navbar-brand img,
+.navbar-brand + span {
+    display: inline-block;
+}
+
+.navbar-brand img {
+    transition: filter 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    filter: brightness(1.1);
+}
+
+header img {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 0.9rem;
+    }
+    
+    .navbar-brand img {
+        height: 35px !important;
+    }
+    
+    header {
+        padding: 2rem 0 !important;
+    }
+    
+    header img {
+        height: 60px !important;
+    }
+}

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheResultFile=".phpunit.result.cache"
+         executionOrder="depends,defects"
+         forceCoversAnnotation="false"
+         beStrictAboutCoversAnnotation="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         verbose="true">
+
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory suffix="Test.php">./tests/Integration</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage cacheDirectory=".phpunit.cache/code-coverage"
+              processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./config</directory>
+            <directory suffix=".php">./admin/php</directory>
+        </include>
+        <exclude>
+            <directory>./vendor</directory>
+            <directory>./tests</directory>
+            <file>./setup_database.php</file>
+            <file>./status.php</file>
+            <file>./test_connection.php</file>
+        </exclude>
+        <report>
+            <html outputDirectory=".phpunit.cache/html-coverage"/>
+            <text outputFile=".phpunit.cache/coverage.txt"/>
+            <clover outputFile=".phpunit.cache/clover.xml"/>
+        </report>
+    </coverage>
+
+    <logging>
+        <junit outputFile=".phpunit.cache/junit.xml"/>
+    </logging>
+
+    <php>
+        <ini name="error_reporting" value="-1" />
+        <ini name="memory_limit" value="-1" />
+
+        <!-- Database configuration for testing -->
+        <env name="DB_HOST" value="localhost"/>
+        <env name="DB_NAME" value="akanyenyeri_test"/>
+        <env name="DB_USER" value="root"/>
+        <env name="DB_PASS" value=""/>
+
+        <!-- Test environment settings -->
+        <env name="APP_ENV" value="testing"/>
+        <env name="SESSION_DRIVER" value="array"/>
+
+        <!-- Security settings for tests -->
+        <env name="CSRF_ENABLED" value="false"/>
+        <env name="SESSION_SECURITY_CHECKS" value="false"/>
+    </php>
+</phpunit>
