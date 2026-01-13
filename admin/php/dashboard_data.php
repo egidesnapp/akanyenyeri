@@ -4,7 +4,7 @@
  * Handles all dashboard data operations and statistics
  */
 
-require_once __DIR__ . "/../../config/database.php";
+require_once __DIR__ . "/../../database/config/database.php";
 
 class DashboardData
 {

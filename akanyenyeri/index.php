@@ -12,7 +12,7 @@ $pdo = getDB();
 // Fetch featured posts
 function getFeaturedPosts($pdo, $limit = 3) {
     try {
-        $stmt = $pdo->prepare("
+        $stmt = $pdo->query("
             SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, p.views,
                    u.full_name as author_name, c.name as category_name, c.color as category_color
             FROM posts p
@@ -20,9 +20,8 @@ function getFeaturedPosts($pdo, $limit = 3) {
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.status = 'published' AND p.is_featured = 1
             ORDER BY p.created_at DESC
-            LIMIT ?
-        ");
-        $stmt->execute([$limit]);
+            LIMIT " . intval($limit)
+        );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return [];
@@ -32,7 +31,7 @@ function getFeaturedPosts($pdo, $limit = 3) {
 // Fetch recent posts
 function getRecentPosts($pdo, $limit = 6) {
     try {
-        $stmt = $pdo->prepare("
+        $stmt = $pdo->query("
             SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, p.views,
                    u.full_name as author_name, c.name as category_name, c.color as category_color
             FROM posts p
@@ -40,9 +39,8 @@ function getRecentPosts($pdo, $limit = 6) {
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.status = 'published'
             ORDER BY p.created_at DESC
-            LIMIT ?
-        ");
-        $stmt->execute([$limit]);
+            LIMIT " . intval($limit)
+        );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return [];
@@ -52,7 +50,7 @@ function getRecentPosts($pdo, $limit = 6) {
 // Fetch popular posts
 function getPopularPosts($pdo, $limit = 4) {
     try {
-        $stmt = $pdo->prepare("
+        $stmt = $pdo->query("
             SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, p.views,
                    u.full_name as author_name, c.name as category_name, c.color as category_color
             FROM posts p
@@ -60,9 +58,8 @@ function getPopularPosts($pdo, $limit = 4) {
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.status = 'published'
             ORDER BY p.views DESC
-            LIMIT ?
-        ");
-        $stmt->execute([$limit]);
+            LIMIT " . intval($limit)
+        );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return [];

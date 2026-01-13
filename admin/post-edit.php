@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once 'php/auth_check.php';
-require_once '../config/database.php';
+require_once '../database/config/database.php';
 
 requireAuth();
 $pdo = getDB();
@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_post'])) {
         $excerpt = trim($_POST['excerpt'] ?? '');
         $category_id = intval($_POST['category_id'] ?? 0);
         $status = $_POST['status'] ?? 'draft';
+        $featured_image = trim($_POST['featured_image'] ?? '');
         $meta_title = trim($_POST['meta_title'] ?? '');
         $meta_description = trim($_POST['meta_description'] ?? '');
         $is_featured = isset($_POST['is_featured']) ? 1 : 0;
@@ -62,13 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_post'])) {
         $stmt = $pdo->prepare("
             UPDATE posts SET
                 title = ?, slug = ?, content = ?, excerpt = ?,
-                category_id = ?, status = ?, is_featured = ?,
+                featured_image = ?, category_id = ?, status = ?, is_featured = ?,
                 meta_title = ?, meta_description = ?, updated_at = NOW()
             WHERE id = ?
         ");
 
         $stmt->execute([
-            $title, $slug, $content, $excerpt,
+            $title, $slug, $content, $excerpt, $featured_image,
             $category_id, $status, $is_featured,
             $meta_title, $meta_description, $post_id
         ]);
@@ -76,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_post'])) {
         $success_message = 'Post updated successfully!';
 
         // Clear cache so changes show immediately on the website
-        require_once __DIR__ . '/../simple_news/cache.php';
+        require_once __DIR__ . '/../public/cache.php';
         cache_clear_posts();
 
         $pdo->prepare("DELETE FROM post_tags WHERE post_id = ?")->execute([$post_id]);
@@ -139,7 +140,7 @@ if (!$post) {
     <title>Edit Post: <?php echo htmlspecialchars($post['title']); ?></title>
     <link rel="stylesheet" href="css/admin-layout.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
     <style>
         :root {
             --primary: #2b6cb0;
@@ -438,6 +439,27 @@ if (!$post) {
                             </div>
                             
                             <div class="sidebar-box">
+                                <h3><i class="fas fa-image"></i> Featured Image</h3>
+                                <div class="form-group">
+                                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <input
+                                            type="url"
+                                            id="featured_image"
+                                            name="featured_image"
+                                            class="form-input"
+                                            placeholder="https://example.com/image.jpg"
+                                            value="<?php echo htmlspecialchars($post['featured_image'] ?? ''); ?>"
+                                            style="display: none;"
+                                        >
+                                        <button type="button" id="selectImageBtn" class="btn" style="flex-shrink: 0; background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
+                                            <i class="fas fa-images"></i> Browse
+                                        </button>
+                                    </div>
+                                    <img id="imagePreview" class="image-preview" alt="Current featured image" style="max-width: 100%; max-height: 150px; border-radius: 6px; margin-top: 0.5rem; <?php echo empty($post['featured_image']) ? 'display: none;' : ''; ?>" src="<?php echo htmlspecialchars($post['featured_image'] ?? ''); ?>">
+                                </div>
+                            </div>
+
+                            <div class="sidebar-box">
                                 <h3><i class="fas fa-tag"></i> Tags</h3>
                                 <div class="form-group">
                                     <input type="text" name="tags" placeholder="tag1, tag2, tag3" value="<?php echo htmlspecialchars(implode(', ', $post_tags)); ?>">
@@ -500,6 +522,142 @@ if (!$post) {
                 return;
             }
         });
+
+        // Image selection functionality
+        (function(){
+            const selectImageBtn = document.getElementById('selectImageBtn');
+            const imageModal = document.createElement('div');
+            imageModal.id = 'imageModal';
+            imageModal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;';
+            imageModal.innerHTML = `
+                <div style="background:white;border-radius:12px;width:90%;max-width:900px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="padding:1.5rem 2rem;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">
+                        <div>
+                            <h3 style="margin:0;font-size:1.375rem;font-weight:700;">Select Featured Image</h3>
+                            <p style="margin:0.5rem 0 0 0;opacity:0.9;font-size:0.875rem;">Choose an image from your media library</p>
+                        </div>
+                        <button type="button" id="closeImageModal" style="background:none;border:none;font-size:2rem;cursor:pointer;color:white;width:40px;height:40px;display:flex;align-items:center;justify-content:center;opacity:0.8;">×</button>
+                    </div>
+                    <div id="imageGallery" style="padding:2rem;overflow-y:auto;flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.5rem;background:#f9fafb;">
+                        <div style="grid-column:1/-1;text-align:center;color:#718096;padding:3rem 1rem;">
+                            <p style="margin:0;animation:pulse 1.5s infinite;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:1rem;"></i><br>Loading images...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(imageModal);
+
+            const featuredImageInput = document.getElementById('featured_image');
+            const imagePreview = document.getElementById('imagePreview');
+
+            // Load images from media library
+            function loadImages() {
+                const gallery = document.getElementById('imageGallery');
+                gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#718096;padding:3rem 1rem;"><p style="margin:0;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:1rem;"></i><br>Loading images...</p></div>';
+
+                fetch('media.php?action=get_images')
+                    .then(response => response.json())
+                    .then(data => {
+                        gallery.innerHTML = '';
+                        if (data.success && data.images.length > 0) {
+                            data.images.forEach(image => {
+                                const div = document.createElement('div');
+                                div.style.cssText = 'cursor:pointer;border:2px solid #e2e8f0;border-radius:8px;overflow:hidden;transition:all 0.3s;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.1);';
+
+                                const imgContainer = document.createElement('div');
+                                imgContainer.style.cssText = 'width:100%;height:160px;overflow:hidden;background:#f3f4f6;display:flex;align-items:center;justify-content:center;';
+
+                                const img = document.createElement('img');
+                                img.src = image.url;
+                                img.alt = image.alt;
+                                img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+
+                                const info = document.createElement('div');
+                                info.style.cssText = 'padding:0.75rem;background:white;display:flex;flex-direction:column;gap:8px;';
+                                info.innerHTML = `<p style="margin:0;font-size:0.8rem;color:#4b5563;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${image.name}</p>`;
+
+                                const insertBtn = document.createElement('button');
+                                insertBtn.textContent = 'Select';
+                                insertBtn.style.cssText = 'padding:6px 8px;border-radius:6px;border:none;background:#2b6cb0;color:#fff;cursor:pointer;font-size:13px;flex:1;';
+                                insertBtn.addEventListener('click', function(e){
+                                    e.stopPropagation();
+                                    featuredImageInput.value = image.url;
+                                    imageModal.style.display = 'none';
+                                    imagePreview.src = image.url;
+                                    imagePreview.style.display = 'block';
+                                    imagePreview.style.marginTop = '1rem';
+                                });
+
+                                info.appendChild(insertBtn);
+
+                                imgContainer.appendChild(img);
+                                div.appendChild(imgContainer);
+                                div.appendChild(info);
+
+                                div.addEventListener('mouseover', function() {
+                                    this.style.borderColor = '#667eea';
+                                    this.style.boxShadow = '0 10px 25px rgba(102,126,234,0.2)';
+                                    this.style.transform = 'translateY(-2px)';
+                                });
+                                div.addEventListener('mouseout', function() {
+                                    this.style.borderColor = '#e2e8f0';
+                                    this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                                    this.style.transform = 'translateY(0)';
+                                });
+
+                                div.addEventListener('click', function() {
+                                    featuredImageInput.value = image.url;
+                                    imageModal.style.display = 'none';
+                                    imagePreview.src = image.url;
+                                    imagePreview.style.display = 'block';
+                                    imagePreview.style.marginTop = '1rem';
+                                });
+
+                                gallery.appendChild(div);
+                            });
+                        } else {
+                            gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#718096;padding:3rem 1rem;"><i class="fas fa-image" style="font-size:3rem;color:#cbd5e0;margin-bottom:1rem;"></i><p style="margin:0.5rem 0 0 0;font-weight:500;">No images found</p><p style="margin:0.5rem 0 0 0;font-size:0.875rem;">Upload images in <a href="media.php" target="_blank" style="color:#667eea;text-decoration:none;">Media Library</a></p></div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading images:', error);
+                        gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#e53e3e;padding:3rem 1rem;"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:1rem;"></i><p style="margin:0;">Error loading images</p><p style="margin:0.5rem 0 0 0;font-size:0.875rem;">Please try again or upload images in Media Library</p></div>';
+                    });
+            }
+
+            if (selectImageBtn) {
+                selectImageBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    imageModal.style.display = 'flex';
+                    loadImages();
+                });
+            }
+
+            document.getElementById('closeImageModal').addEventListener('click', function() {
+                imageModal.style.display = 'none';
+            });
+
+            imageModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+
+            // Featured image preview
+            if (featuredImageInput && imagePreview) {
+                featuredImageInput.addEventListener('input', function() {
+                    if (this.value) {
+                        imagePreview.src = this.value;
+                        imagePreview.style.display = 'block';
+                        imagePreview.onerror = function() {
+                            this.style.display = 'none';
+                        };
+                    } else {
+                        imagePreview.style.display = 'none';
+                    }
+                });
+            }
+        })();
     </script>
 </body>
 </html>

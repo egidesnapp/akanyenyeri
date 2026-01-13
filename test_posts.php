@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/database.php';
+require_once 'database/config/database.php';
 
 $pdo = getDB();
 

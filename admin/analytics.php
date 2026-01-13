@@ -6,7 +6,7 @@
 
 session_start();
 require_once "php/auth_check.php";
-require_once "../config/database.php";
+require_once "php/dashboard_data.php";
 
 // Require authentication
 requireAuth();
@@ -82,84 +82,25 @@ switch ($date_range) {
         $end_date = date("Y-m-d");
 }
 
-// Get analytics data
+// Get dashboard data using the same class as the main dashboard
+$dashboard_data = $dashboard->getDashboardSummary();
+
+// Extract data for analytics (use all data since analytics shows overall stats)
+$overview = [
+    "total_posts" => $dashboard_data["total_posts"] ?? 0,
+    "total_views" => $dashboard_data["total_views"] ?? 0,
+    "total_comments" => $dashboard_data["total_comments"] ?? 0,
+    "total_users" => $dashboard_data["total_users"] ?? 0,
+];
+
+// Use data from dashboard summary
+$popular_posts = $dashboard_data["popular_posts"] ?? [];
+$categories_data = $dashboard_data["posts_by_category"] ?? [];
+$top_authors = $dashboard_data["top_authors"] ?? [];
+$recent_comments = $dashboard_data["recent_comments"] ?? [];
+
+// For daily stats, we need to get it separately since dashboard summary doesn't include date-filtered data
 try {
-    // Overview statistics
-    $overview = [
-        "total_posts" => 0,
-        "total_views" => 0,
-        "total_comments" => 0,
-        "total_users" => 0,
-    ];
-
-    // Total posts
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) as count
-        FROM posts
-        WHERE status = 'published'
-        AND DATE(created_at) BETWEEN ? AND ?
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $overview["total_posts"] = $stmt->fetchColumn();
-
-    // Total views
-    $stmt = $pdo->prepare("
-        SELECT SUM(views) as total
-        FROM posts
-        WHERE status = 'published'
-        AND DATE(created_at) BETWEEN ? AND ?
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $overview["total_views"] = $stmt->fetchColumn() ?: 0;
-
-    // Total comments
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) as count
-        FROM comments c
-        INNER JOIN posts p ON c.post_id = p.id
-        WHERE c.status = 'approved'
-        AND DATE(c.created_at) BETWEEN ? AND ?
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $overview["total_comments"] = $stmt->fetchColumn();
-
-    // Total users
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) as count
-        FROM users
-        WHERE status = 'active'
-        AND DATE(created_at) BETWEEN ? AND ?
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $overview["total_users"] = $stmt->fetchColumn();
-
-    // Most viewed posts
-    $stmt = $pdo->prepare("
-        SELECT p.title, p.views, p.slug, c.name as category_name, c.color as category_color
-        FROM posts p
-        LEFT JOIN categories c ON p.category_id = c.id
-        WHERE p.status = 'published'
-        AND DATE(p.created_at) BETWEEN ? AND ?
-        ORDER BY p.views DESC
-        LIMIT 10
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $popular_posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Posts by category
-    $stmt = $pdo->prepare("
-        SELECT c.name, c.color, COUNT(p.id) as post_count, SUM(p.views) as total_views
-        FROM categories c
-        LEFT JOIN posts p ON c.id = p.category_id
-        WHERE p.status = 'published'
-        AND DATE(p.created_at) BETWEEN ? AND ?
-        GROUP BY c.id, c.name, c.color
-        ORDER BY post_count DESC
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $categories_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Daily post statistics for chart
     $stmt = $pdo->prepare("
         SELECT DATE(created_at) as date, COUNT(*) as posts, SUM(views) as views
         FROM posts
@@ -170,86 +111,33 @@ try {
     ");
     $stmt->execute([$start_date, $end_date]);
     $daily_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Top authors
-    $stmt = $pdo->prepare("
-        SELECT u.full_name, u.username, COUNT(p.id) as post_count, SUM(p.views) as total_views
-        FROM users u
-        INNER JOIN posts p ON u.id = p.author_id
-        WHERE p.status = 'published'
-        AND DATE(p.created_at) BETWEEN ? AND ?
-        GROUP BY u.id, u.full_name, u.username
-        ORDER BY post_count DESC
-        LIMIT 10
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $top_authors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Recent comments
-    $stmt = $pdo->prepare("
-        SELECT c.author_name, c.content, c.created_at, p.title as post_title, p.slug as post_slug
-        FROM comments c
-        INNER JOIN posts p ON c.post_id = p.id
-        WHERE c.status = 'approved'
-        AND DATE(c.created_at) BETWEEN ? AND ?
-        ORDER BY c.created_at DESC
-        LIMIT 10
-    ");
-    $stmt->execute([$start_date, $end_date]);
-    $recent_comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Additional analytics data
-    // Traffic sources (simulated data)
-    $traffic_sources = [
-        [
-            "source" => "Direct",
-            "visitors" => rand(150, 300),
-            "percentage" => 45,
-        ],
-        [
-            "source" => "Search Engines",
-            "visitors" => rand(100, 200),
-            "percentage" => 30,
-        ],
-        [
-            "source" => "Social Media",
-            "visitors" => rand(50, 150),
-            "percentage" => 15,
-        ],
-        [
-            "source" => "Referrals",
-            "visitors" => rand(20, 80),
-            "percentage" => 10,
-        ],
-    ];
-
-    // Browser statistics (simulated)
-    $browser_stats = [
-        ["browser" => "Chrome", "percentage" => 65],
-        ["browser" => "Firefox", "percentage" => 20],
-        ["browser" => "Safari", "percentage" => 10],
-        ["browser" => "Edge", "percentage" => 5],
-    ];
-
-    // Device statistics
-    $device_stats = [
-        ["device" => "Desktop", "percentage" => 60],
-        ["device" => "Mobile", "percentage" => 35],
-        ["device" => "Tablet", "percentage" => 5],
-    ];
 } catch (Exception $e) {
-    $overview = [
-        "total_posts" => 0,
-        "total_views" => 0,
-        "total_comments" => 0,
-        "total_users" => 0,
-    ];
-    $popular_posts = [];
-    $categories_data = [];
     $daily_stats = [];
-    $top_authors = [];
-    $recent_comments = [];
 }
+
+// Additional analytics data (simulated for demo)
+$traffic_sources = [
+    [
+        "source" => "Direct",
+        "visitors" => rand(150, 300),
+        "percentage" => 45,
+    ],
+    [
+        "source" => "Search Engines",
+        "visitors" => rand(100, 200),
+        "percentage" => 30,
+    ],
+    [
+        "source" => "Social Media",
+        "visitors" => rand(50, 150),
+        "percentage" => 15,
+    ],
+    [
+        "source" => "Referrals",
+        "visitors" => rand(20, 80),
+        "percentage" => 10,
+    ],
+];
 
 // Get current user info
 $current_user = getCurrentUser();

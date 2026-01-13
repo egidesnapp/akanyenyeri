@@ -38,37 +38,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
 			$message = 'Invalid file type.';
 			$messageType = 'error';
 		} else {
-			$ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
-			$safe = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($f['name']));
-			$filename = time() . '_' . bin2hex(random_bytes(6)) . '_' . $safe;
-			$uploadDir = __DIR__ . '/../uploads/images/';
-			if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-			$target = $uploadDir . $filename;
-			if (move_uploaded_file($f['tmp_name'], $target)) {
+			// Check for duplicate file (same name, size, and type)
+			$duplicateCheck = $db->prepare('SELECT id FROM media WHERE original_name = ? AND file_size = ? AND mime_type = ? LIMIT 1');
+			$duplicateCheck->execute([$f['name'], $f['size'], $f['type']]);
+			if ($duplicateCheck->fetch()) {
+				$message = 'This file already exists in the media library (same name, size, and type).';
+				$messageType = 'error';
+			} else {
+				$ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+				$safe = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($f['name']));
+				$filename = time() . '_' . bin2hex(random_bytes(6)) . '_' . $safe;
+				$uploadDir = __DIR__ . '/../uploads/images/';
+				if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+				$target = $uploadDir . $filename;
+				if (move_uploaded_file($f['tmp_name'], $target)) {
 				try {
-					$stmt = $db->prepare('INSERT INTO media (filename, original_name, mime_type, file_size, alt_text, caption, uploaded_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
-					$stmt->execute([
+					$user_id = $_SESSION['admin_user_id'] ?? null;
+					if (!$user_id) {
+						throw new Exception('User not authenticated');
+					}
+
+					$stmt = $db->prepare('INSERT INTO media (filename, original_name, file_path, file_size, mime_type, alt_text, caption, uploaded_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())');
+					$result = $stmt->execute([
 						$filename,
 						$f['name'],
-						$f['type'],
+						$target,
 						$f['size'],
+						$f['type'],
 						trim($_POST['alt_text'] ?? ''),
 						trim($_POST['caption'] ?? ''),
-						$_SESSION['admin_user_id'] ?? null,
+						$user_id,
 					]);
-					$message = 'File uploaded.';
-					$messageType = 'success';
+
+					if ($result) {
+						$message = 'File uploaded successfully.';
+						$messageType = 'success';
+					} else {
+						throw new Exception('Insert failed');
+					}
 				} catch (Exception $e) {
 					@unlink($target);
-					$message = 'Database error.';
+					$message = 'Database error: ' . $e->getMessage();
 					$messageType = 'error';
 				}
-			} else {
-				$message = 'Could not move uploaded file.';
-				$messageType = 'error';
+				} else {
+					$message = 'Could not move uploaded file.';
+					$messageType = 'error';
+				}
 			}
 		}
 	}
+}
+
+// Handle get images for post editor
+if (isset($_GET['action']) && $_GET['action'] === 'get_images') {
+	header('Content-Type: application/json');
+	try {
+		$stmt = $db->query('SELECT id, filename, original_name, alt_text, caption FROM media WHERE mime_type LIKE "image/%" ORDER BY created_at DESC LIMIT 50');
+		$images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		$imageData = array_map(function($img) {
+			return [
+				'id' => $img['id'],
+				'name' => $img['original_name'],
+				'url' => '../uploads/images/' . $img['filename'],
+				'alt' => $img['alt_text'] ?: $img['original_name'],
+				'caption' => $img['caption'] ?: ''
+			];
+		}, $images);
+
+		echo json_encode(['success' => true, 'images' => $imageData]);
+	} catch (Exception $e) {
+		echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+	}
+	exit;
 }
 
 // Handle delete
@@ -165,11 +208,22 @@ $totalSizeMB = round($totalSize / 1024 / 1024, 2);
 		/* Toolbar + upload */
 		.toolbar{display:flex;gap:12px;align-items:center}
 		.upload-card{background:#fff;border-radius:10px;padding:18px;border:1px solid #eef2f6;box-shadow:0 6px 18px rgba(16,24,40,0.04)}
-		.upload-zone{border:2px dashed #dbeafe;border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all .18s}
+		.upload-zone{border:2px dashed #dbeafe;border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all .18s;position:relative}
 		.upload-zone:hover{background:#f8fbff}
+		.upload-zone.selected{border-color:#10b981;background:#f0fdf4}
+		.upload-zone.dragover{border-color:#3b82f6;background:#eff6ff}
+		.selected-file{display:none;margin-top:16px;padding:12px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0}
+		.file-info{display:flex;align-items:center;gap:12px}
+		.file-icon{font-size:24px;color:#6b7280}
+		.file-details{flex:1;text-align:left}
+		.file-name{font-weight:600;color:#1f2937;margin-bottom:2px}
+		.file-size{color:#6b7280;font-size:14px}
+		.remove-file{background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:12px}
+		.remove-file:hover{background:#dc2626}
 		.upload-meta{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:14px}
 		.meta-input{padding:10px;border:1px solid #e6eef5;border-radius:8px}
 		.upload-btn{background:linear-gradient(90deg,var(--accent),#553c9a);color:#fff;padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+		.upload-btn:disabled{background:#9ca3af;cursor:not-allowed}
 
 		/* Filters */
 		.filters{display:flex;gap:12px;align-items:center;margin:16px 0}
@@ -306,12 +360,71 @@ $totalSizeMB = round($totalSize / 1024 / 1024, 2);
 		(function(){
 			const uploadZone = document.getElementById('uploadZone');
 			const fileInput = document.getElementById('media_file');
+			const selectedFileDiv = document.getElementById('selectedFile');
+			const fileIcon = document.getElementById('fileIcon');
+			const fileName = document.getElementById('fileName');
+			const fileSize = document.getElementById('fileSize');
+			const removeFileBtn = document.getElementById('removeFile');
+			const uploadText = document.getElementById('uploadText');
+			const uploadBtn = document.querySelector('.upload-btn');
+
 			if (!uploadZone || !fileInput) return;
+
+			function formatFileSize(bytes) {
+				if (bytes === 0) return '0 Bytes';
+				const k = 1024;
+				const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+				const i = Math.floor(Math.log(bytes) / Math.log(k));
+				return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+			}
+
+			function getFileIcon(mimeType) {
+				if (mimeType.startsWith('image/')) return '🖼️';
+				if (mimeType === 'application/pdf') return '📄';
+				return '📄';
+			}
+
+			function updateFileDisplay(file) {
+				if (file) {
+					fileIcon.textContent = getFileIcon(file.type);
+					fileName.textContent = file.name;
+					fileSize.textContent = formatFileSize(file.size);
+					selectedFileDiv.style.display = 'block';
+					uploadZone.classList.add('selected');
+					uploadText.textContent = 'File selected - ready to upload!';
+					if (uploadBtn) uploadBtn.disabled = false;
+				} else {
+					selectedFileDiv.style.display = 'none';
+					fileIcon.textContent = '📄';
+					fileName.textContent = 'No file selected';
+					fileSize.textContent = '0 KB';
+					uploadZone.classList.remove('selected');
+					uploadText.textContent = 'Drag & drop a file here, or click to browse';
+					if (uploadBtn) uploadBtn.disabled = true;
+				}
+			}
+
+			function clearFileSelection() {
+				fileInput.value = '';
+				updateFileDisplay(null);
+			}
 
 			uploadZone.addEventListener('click', ()=> fileInput.click());
 			uploadZone.addEventListener('dragover', e=>{ e.preventDefault(); uploadZone.classList.add('dragover'); });
 			uploadZone.addEventListener('dragleave', e=>{ e.preventDefault(); uploadZone.classList.remove('dragover'); });
-			uploadZone.addEventListener('drop', e=>{ e.preventDefault(); uploadZone.classList.remove('dragover'); if(e.dataTransfer.files.length) fileInput.files = e.dataTransfer.files; });
+			uploadZone.addEventListener('drop', e=>{ e.preventDefault(); uploadZone.classList.remove('dragover'); if(e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; updateFileDisplay(e.dataTransfer.files[0]); } });
+
+			fileInput.addEventListener('change', function(e) {
+				const file = e.target.files[0];
+				updateFileDisplay(file);
+			});
+
+			if (removeFileBtn) {
+				removeFileBtn.addEventListener('click', clearFileSelection);
+			}
+
+			// Initialize on page load
+			updateFileDisplay(null);
 
 			window.insertImage = function(path){
 				// If host page defines a handler, call it (for editors)

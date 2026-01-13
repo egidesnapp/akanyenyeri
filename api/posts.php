@@ -10,7 +10,7 @@ if (!headers_sent()) {
 
 // Simple inline cache helper to avoid path issues
 function api_cache_get($key, $ttl = 10) {
-    $dir = __DIR__ . '/../simple_news/cache';
+    $dir = __DIR__ . '/../akanyenyeri/cache';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $file = $dir . '/' . preg_replace('/[^a-z0-9_\-]/i','_', $key) . '.json';
     if (!file_exists($file)) return false;

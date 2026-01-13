@@ -6,7 +6,7 @@
 
 session_start();
 require_once "php/auth_check.php";
-require_once "../config/database.php";
+require_once "../database/config/database.php";
 
 // Require authentication
 requireAuth();
@@ -155,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["create_post"])) {
         error_log("Post creation complete");
 
         // Clear cache so new post shows immediately on the website
-        require_once __DIR__ . '/../simple_news/cache.php';
+        require_once __DIR__ . '/../public/cache.php';
         cache_clear_posts();
 
         // Redirect to posts list with success message
@@ -192,6 +192,7 @@ $current_user = getCurrentUser();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/admin-layout.css">
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 
     <style>
         /* Add New Post specific styles */

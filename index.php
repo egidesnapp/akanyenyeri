@@ -1,4 +1,4 @@
 <?php
-// Redirect root homepage to the new simple_news frontend
-header('Location: simple_news/');
+// Redirect root homepage to the akanyenyeri magazine frontend
+header('Location: akanyenyeri/');
 exit;
