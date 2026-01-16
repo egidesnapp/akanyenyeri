@@ -377,7 +377,7 @@ $current_user = getCurrentUser();
                 <!-- Welcome Section -->
                 <div class="welcome-section">
                     <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                        <img src="../uploads/akanyenyeri-logo.svg" alt="Akanyenyeri Logo" style="height: 60px; width: auto;">
+                        <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 60px; width: auto;">
                         <div>
                             <h1 style="margin: 0; margin-bottom: 5px;"><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
                             <p style="margin: 0;">Welcome back, <?= htmlspecialchars(

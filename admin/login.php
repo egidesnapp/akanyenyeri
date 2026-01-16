@@ -160,7 +160,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="brand">
-                <img src="../uploads/akanyenyeri-logo.svg" alt="Akanyenyeri Logo" style="height: 80px; width: auto; margin-bottom: 1rem;">
+                <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 80px; width: auto; margin-bottom: 1rem;">
                 <h1>Admin Login</h1>
             </div>
             

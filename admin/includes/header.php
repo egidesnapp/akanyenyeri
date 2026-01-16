@@ -127,7 +127,7 @@ $page_title = $page_titles[$current_page] ?? 'Admin Panel';
         <div class="user-menu-dropdown">
             <button class="user-menu-toggle" id="userMenuToggle">
                 <div class="user-avatar">
-                    <i class="fas fa-user"></i>
+                    <img src="../logo/akanyenyeri logo.png" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 </div>
                 <div class="user-info">
                     <div class="user-name"><?php echo htmlspecialchars($current_user['full_name'] ?? 'User'); ?></div>
@@ -139,7 +139,7 @@ $page_title = $page_titles[$current_page] ?? 'Admin Panel';
             <div class="user-menu" id="userMenu">
                 <div class="user-menu-header">
                     <div class="user-avatar-large">
-                        <i class="fas fa-user"></i>
+                        <img src="../logo/akanyenyeri logo.png" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                     </div>
                     <div class="user-details">
                         <div class="name"><?php echo htmlspecialchars($current_user['full_name'] ?? 'User'); ?></div>

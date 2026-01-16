@@ -741,9 +741,9 @@ function timeAgo($datetime) {
                                 <tr>
                                     <td>
                                         <div class="user-info">
-                                            <div class="user-avatar">
-                                                <?php echo strtoupper(substr($user['full_name'] ?: $user['username'], 0, 1)); ?>
-                                            </div>
+                        <div class="user-avatar">
+                            <img src="../logo/akanyenyeri logo.png" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        </div>
                                             <div class="user-details">
                                                 <div class="user-name"><?php echo htmlspecialchars($user['full_name']); ?></div>
                                                 <div class="user-email"><?php echo htmlspecialchars($user['email']); ?></div>

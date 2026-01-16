@@ -12,7 +12,7 @@ $current_user = getCurrentUser();
     <div class="sidebar-header">
         <div class="logo">
             <a href="../public/index.php" target="_blank" title="View Website">
-                <img src="../uploads/akanyenyeri-logo.svg" alt="Akanyenyeri Logo" style="height: 40px; width: auto;">
+                <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 40px; width: auto;">
                 <span class="logo-text">Akanyenyeri</span>
             </a>
         </div>
@@ -206,7 +206,7 @@ $current_user = getCurrentUser();
     <div class="sidebar-footer">
         <div class="user-info">
             <div class="user-avatar">
-                <i class="fas fa-user"></i>
+                <img src="../logo/akanyenyeri logo.png" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
             </div>
             <div class="user-details">
                 <div class="user-name"><?php echo htmlspecialchars(
