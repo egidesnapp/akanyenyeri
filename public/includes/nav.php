@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-newspaper text-warning me-2"></i>
+                <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 30px; width: auto; margin-right: 8px;">
                 Akanyenyeri
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

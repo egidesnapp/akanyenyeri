@@ -70,7 +70,7 @@ $categories = getCategoriesWithCounts($pdo);
                     Your trusted source for breaking news, in-depth analysis, and compelling stories from around the globe.
                 </p>
                 <a href="#news" class="btn-custom fade-in" data-aos="fade-up" data-aos-delay="400">
-                    <i class="fas fa-newspaper me-2"></i>Explore Latest News
+                    <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 20px; width: auto; margin-right: 8px;">Explore Latest News
                 </a>
             </div>
         </div>
@@ -85,7 +85,7 @@ $categories = getCategoriesWithCounts($pdo);
 
             <?php if (empty($featured_posts)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 80px; width: auto; margin-bottom: 1rem; opacity: 0.5;">
                 <h3>No posts available</h3>
                 <p>Please check back later for the latest news.</p>
             </div>
@@ -269,8 +269,8 @@ $categories = getCategoriesWithCounts($pdo);
                     </form>
                 </div>
                 <div class="col-lg-6" data-aos="slide-in-right">
-                    <div class="text-center">
-                        <i class="fas fa-newspaper fa-5x text-primary mb-4"></i>
+                <div class="text-center">
+                        <img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 120px; width: auto; margin-bottom: 1rem;">
                         <h4>Breaking News Alert</h4>
                         <p>Get instant notifications for major stories</p>
                     </div>

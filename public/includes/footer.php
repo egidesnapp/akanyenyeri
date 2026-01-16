@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4" data-aos="fade-up">
-                    <h5><i class="fas fa-newspaper text-warning me-2"></i>Akanyenyeri Magazine</h5>
+                    <h5><img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 25px; width: auto; margin-right: 8px;">Akanyenyeri Magazine</h5>
                     <p>Your trusted source for comprehensive news coverage, in-depth analysis, and compelling storytelling from around the world.</p>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
