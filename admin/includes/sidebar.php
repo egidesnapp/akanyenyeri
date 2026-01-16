@@ -11,7 +11,7 @@ $current_user = getCurrentUser();
 <div class="admin-sidebar">
     <div class="sidebar-header">
         <div class="logo">
-            <a href="../index.php" target="_blank" title="View Website">
+            <a href="../public/index.php" target="_blank" title="View Website">
                 <img src="../uploads/akanyenyeri-logo.svg" alt="Akanyenyeri Logo" style="height: 40px; width: auto;">
                 <span class="logo-text">Akanyenyeri</span>
             </a>
@@ -24,7 +24,7 @@ $current_user = getCurrentUser();
             <i class="fas fa-plus-circle"></i>
             <span>New Post</span>
         </a>
-        <a href="../index.php" class="quick-action-btn" title="View Site" target="_blank">
+        <a href="../public/index.php" class="quick-action-btn" title="View Site" target="_blank">
             <i class="fas fa-external-link-alt"></i>
             <span>View Site</span>
         </a>
@@ -222,7 +222,7 @@ $current_user = getCurrentUser();
             <a href="users.php?edit=<?php echo $current_user['id']; ?>" class="action-btn" title="Profile">
                 <i class="fas fa-user"></i>
             </a>
-            <a href="../index.php" class="action-btn" title="View Site" target="_blank">
+            <a href="../public/index.php" class="action-btn" title="View Site" target="_blank">
                 <i class="fas fa-external-link-alt"></i>
             </a>
             <a href="php/logout.php" class="action-btn" title="Logout">

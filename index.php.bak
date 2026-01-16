@@ -1,7 +1,0 @@
-<?php
-/* Backup of original index.php saved on 2026-01-03
-   The original site homepage was replaced with a redirect to the new simple_news frontend.
-   If you need the original content restored, rename this file to index.php and remove the redirect.
-*/
-
-file_put_contents(__DIR__ . '/index.php.bak.txt', "Backup created on " . date('c') . "\n");

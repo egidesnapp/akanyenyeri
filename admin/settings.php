@@ -6,7 +6,7 @@
 
 session_start();
 require_once 'php/auth_check.php';
-require_once '../config/database.php';
+require_once '../database/config/database.php';
 
 // Require authentication and admin role
 requireAuth();

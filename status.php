@@ -36,13 +36,13 @@ function testPHPSetup() {
 function testDatabaseConfig() {
     global $critical_errors;
 
-    if (!file_exists(__DIR__ . '/config/database.php')) {
+    if (!file_exists(__DIR__ . '/database/config/database.php')) {
         $critical_errors[] = "Database configuration file missing";
         return false;
     }
 
     try {
-        require_once __DIR__ . '/config/database.php';
+        require_once __DIR__ . '/database/config/database.php';
 
         if (!defined('DB_HOST') || !defined('DB_NAME') || !defined('DB_USER')) {
             $critical_errors[] = "Database configuration incomplete";
@@ -86,7 +86,8 @@ function testDatabase($pdo) {
         $db_name = defined('DB_NAME') ? DB_NAME : 'akanyenyeri_db';
 
         // Check if database exists
-        $stmt = $pdo->query("SHOW DATABASES LIKE '$db_name'");
+        $stmt = $pdo->prepare("SHOW DATABASES LIKE ?");
+        $stmt->execute([$db_name]);
         if ($stmt->rowCount() == 0) {
             $warnings[] = "Database '$db_name' does not exist - needs setup";
             return 'needs_setup';
@@ -161,7 +162,7 @@ function testFrontendFiles() {
     $frontend_files = [
         'index.php' => 'Dynamic homepage',
         'index.html' => 'Static homepage (backup)',
-        'config/database.php' => 'Database configuration',
+        'database/config/database.php' => 'Database configuration',
         'css/dark-theme.css' => 'Theme styles',
         'js/theme.js' => 'Theme scripts'
     ];

@@ -6,7 +6,7 @@
 
 session_start();
 require_once 'php/auth_check.php';
-require_once '../config/database.php';
+require_once '../database/config/database.php';
 
 // Require authentication
 requireAuth();
@@ -86,8 +86,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 throw new Exception('Profile picture must be less than 2MB');
             }
 
+            // Get actual MIME type from file content
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $actual_mime = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+
             $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($file['type'], $allowed_types)) {
+            if (!in_array($actual_mime, $allowed_types) || !in_array($file['type'], $allowed_types)) {
                 throw new Exception('Invalid image type. Allowed: JPG, PNG, GIF, WebP');
             }
 

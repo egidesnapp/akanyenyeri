@@ -5,7 +5,7 @@
  */
 
 session_start();
-require_once __DIR__ . "/../config/database.php";
+require_once __DIR__ . "/../database/config/database.php";
 require_once __DIR__ . "/php/auth_check.php";
 require_once __DIR__ . "/php/rate_limiter.php";
 

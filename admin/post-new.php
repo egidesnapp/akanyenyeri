@@ -769,7 +769,12 @@ $current_user = getCurrentUser();
                                             <button type="button" id="selectImageBtn" class="btn" style="flex-shrink: 0; background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
                                                 <i class="fas fa-images"></i> Browse
                                             </button>
+                                            <button type="button" id="uploadImageBtn" class="btn" style="flex-shrink: 0; background: #059669; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
+                                                <i class="fas fa-upload"></i> Upload
+                                            </button>
+                                            <input type="file" id="imageUpload" style="display: none;">
                                         </div>
+                                        <div id="uploadStatus" style="margin-top: 0.5rem; font-size: 0.875rem;"></div>
                                         <img id="imagePreview" class="image-preview" alt="Preview">
                                     </div>
                                 </div>
@@ -878,9 +883,12 @@ $current_user = getCurrentUser();
             function loadImages() {
                 imageGallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #718096; padding: 3rem 1rem;"><p style="margin: 0;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i><br>Loading images...</p></div>';
                 
-                fetch('php/media_list.php')
+                fetch('php/media_list.php', { credentials: 'same-origin' })
                     .then(response => {
-                        if (!response.ok) throw new Error('Failed to load images');
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                        }
                         return response.json();
                     })
                     .then(data => {
@@ -924,7 +932,7 @@ $current_user = getCurrentUser();
                                     deleteBtn.addEventListener('click', function(e){
                                         e.stopPropagation();
                                         if (!confirm('Delete this file?')) return;
-                                        fetch('media.php?action=delete&id='+encodeURIComponent(image.id), { method: 'GET', credentials: 'same-origin' })
+                                        fetch('php/media_actions.php?action=delete&media_id='+encodeURIComponent(image.id), { method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: 'csrf_token=<?php echo getCSRFToken(); ?>' })
                                             .then(resp => {
                                                 if (resp.ok) {
                                                     showToast('Deleted');
@@ -997,9 +1005,71 @@ $current_user = getCurrentUser();
                 }
             });
 
-            // Featured image preview
+            // Upload image functionality
+            const uploadImageBtn = document.getElementById('uploadImageBtn');
+            const imageUploadInput = document.getElementById('imageUpload');
+            const uploadStatus = document.getElementById('uploadStatus');
             const imagePreview = document.getElementById('imagePreview');
 
+            if (uploadImageBtn && imageUploadInput) {
+                uploadImageBtn.addEventListener('click', function() {
+                    imageUploadInput.click();
+                });
+            }
+
+            if (imageUploadInput) {
+                imageUploadInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        // Validate file size (15MB limit)
+                        if (file.size > 15728640) {
+                            uploadStatus.textContent = 'File size must be less than 15MB.';
+                            uploadStatus.style.color = '#e53e3e';
+                            return;
+                        }
+
+                        // Show uploading status
+                        uploadStatus.textContent = 'Uploading image...';
+                        uploadStatus.style.color = '#3182ce';
+
+                        // Create FormData and upload
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        formData.append('csrf_token', '<?php echo getCSRFToken(); ?>');
+
+                        fetch('php/media_actions.php?action=upload', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                featuredImageInput.value = data.url;
+                                imagePreview.src = data.url;
+                                imagePreview.style.display = 'block';
+                                uploadStatus.textContent = 'Image uploaded successfully!';
+                                uploadStatus.style.color = '#38a169';
+
+                                // Clear status after 3 seconds
+                                setTimeout(() => {
+                                    uploadStatus.textContent = '';
+                                }, 3000);
+                            } else {
+                                uploadStatus.textContent = data.error || 'Upload failed.';
+                                uploadStatus.style.color = '#e53e3e';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Upload error:', error);
+                            uploadStatus.textContent = 'Upload failed. Please try again.';
+                            uploadStatus.style.color = '#e53e3e';
+                        });
+                    }
+                });
+            }
+
+            // Featured image preview
             if (featuredImageInput && imagePreview) {
                 featuredImageInput.addEventListener('input', function() {
                     if (this.value) {

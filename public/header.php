@@ -1,110 +1,192 @@
 <?php
-// Get dynamic website settings
-$site_name = 'Akanyenyeri Magazine';
-$site_description = 'Breaking News, Analysis, and Stories';
-
-try {
-    require_once __DIR__ . '/../config/database.php';
-    $pdo = getDB();
-    $stmt = $pdo->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('site_name', 'site_description')");
-    $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-    if (!empty($settings['site_name'])) $site_name = $settings['site_name'];
-    if (!empty($settings['site_description'])) $site_description = $settings['site_description'];
-} catch (Exception $e) {
-    // Use defaults if database not available
-}
+$site_title = "Akanyenyeri Magazine";
+$site_description = "Breaking news, in-depth analysis, and compelling stories from around the world.";
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo htmlspecialchars($site_name); ?></title>
-    
-    <!-- Rectified Magazine CSS -->
-    <link rel="stylesheet" href="../assets/css/rectified.css">
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $site_title; ?></title>
+    <meta name="description" content="<?php echo $site_description; ?>">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Basic styles for single.php and category.php */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        .site-header {
+            background: #333;
+            color: #fff;
+            padding: 1rem 0;
+        }
+        .site-header .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .site-branding h1 a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .main-navigation ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .main-navigation li {
+            margin-left: 1rem;
+        }
+        .main-navigation a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .site-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 5px;
+        }
+        .container-inner {
+            display: flex;
+        }
+        .site-main {
+            flex: 1;
+            margin-right: 2rem;
+        }
+        .widget-area {
+            width: 300px;
+        }
+        .widget {
+            margin-bottom: 2rem;
+        }
+        .widget-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .widget ul {
+            list-style: none;
+            padding: 0;
+        }
+        .widget li {
+            margin-bottom: 0.5rem;
+        }
+        .widget a {
+            text-decoration: none;
+            color: #333;
+        }
+        .breadcrumbs {
+            margin-bottom: 1rem;
+        }
+        .breadcrumbs ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+        }
+        .breadcrumbs li {
+            margin-right: 0.5rem;
+        }
+        .breadcrumbs a {
+            color: #666;
+            text-decoration: none;
+        }
+        .post {
+            margin-bottom: 2rem;
+        }
+        .entry-header {
+            margin-bottom: 1rem;
+        }
+        .entry-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .entry-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .post-thumbnail img {
+            max-width: 100%;
+            height: auto;
+        }
+        .entry-content {
+            line-height: 1.8;
+        }
+        .site-footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+        .site-footer .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .archive-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-item {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+        .post-item-thumbnail {
+            margin-right: 1rem;
+        }
+        .post-item-thumbnail img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .post-item-content {
+            flex: 1;
+        }
+        .post-item-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .post-item-title a {
+            text-decoration: none;
+            color: #333;
+        }
+        .post-item-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .post-item-excerpt {
+            color: #666;
+        }
+    </style>
 </head>
-<body <?php body_class(); ?>>
-<div id="page" class="site">
-    <a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'rectified-magazine' ); ?></a>
-
-    <!-- Header -->
-    <header id="masthead" class="site-header">
-        <!-- Top Bar -->
-        <div class="top-bar">
-            <div class="container-inner">
-                <div class="top-left-col">
-                    <div class="ct-clock">
-                        <i class="fa fa-clock-o"></i> <?php echo date('l, F j, Y'); ?>
-                    </div>
-                    <ul class="top-menu">
-                        <li><a href="index.php">Home</a></li>
-                        <li><a href="index.php?category=politics">Politics</a></li>
-                        <li><a href="index.php?category=business">Business</a></li>
-                        <li><a href="../admin/login.php">Admin</a></li>
-                    </ul>
-                </div>
-                <div class="top-right-col">
-                    <div class="rectified-magazine-social-top">
-                        <div>
-                            <span class="rectified-magazine-social-text">Follow Us:</span>
-                        </div>
-                        <ul class="rectified-magazine-menu-social">
-                            <li><a href="#" target="_blank"><i class="fa fa-facebook"></i></a></li>
-                            <li><a href="#" target="_blank"><i class="fa fa-twitter"></i></a></li>
-                            <li><a href="#" target="_blank"><i class="fa fa-instagram"></i></a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+<body>
+<header class="site-header">
+    <div class="container">
+        <div class="site-branding">
+            <h1><a href="index.php">Akanyenyeri</a></h1>
         </div>
-
-        <!-- Site Branding and Menu -->
-        <div class="rectified-magazine-menu-container">
-            <div class="container-inner">
-                <div class="rectified-magazine-header-left-logo">
-                    <div class="rectified-magazine-logo-main-container">
-                        <div class="rectified-magazine-logo-container">
-                            <div class="site-branding">
-                                <div class="site-branding-wrapper">
-                                    <a href="index.php" class="custom-logo-link" rel="home">
-                                        <img src="../uploads/akanyenyeri-logo.svg" alt="<?php echo htmlspecialchars($site_name); ?>" class="custom-logo" style="height: 60px;">
-                                    </a>
-                                    <h1 class="site-title">
-                                        <a href="index.php" rel="home"><?php echo htmlspecialchars($site_name); ?></a>
-                                    </h1>
-                                    <p class="site-description"><?php echo htmlspecialchars($site_description); ?></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="rectified-magazine-menu-container">
-                        <nav id="site-navigation" class="main-navigation">
-                            <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
-                                <span class="screen-reader-text">Primary Menu</span>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </button>
-                            <div class="menu-main-menu-container">
-                                <ul id="primary-menu" class="menu">
-                                    <li class="menu-item"><a href="index.php">Home</a></li>
-                                    <li class="menu-item"><a href="index.php?category=politics">Politics</a></li>
-                                    <li class="menu-item"><a href="index.php?category=business">Business</a></li>
-                                    <li class="menu-item"><a href="index.php?category=technology">Technology</a></li>
-                                    <li class="menu-item"><a href="index.php?category=sports">Sports</a></li>
-                                    <li class="menu-item"><a href="../admin/login.php">Admin</a></li>
-                                </ul>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div id="content" class="site-content">
-        <div class="container-inner ct-container-main">
+        <nav class="main-navigation">
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="#news">News</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>

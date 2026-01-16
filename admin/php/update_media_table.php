@@ -4,7 +4,7 @@
  * Adds missing columns to the media table for full functionality
  */
 
-require_once "../../config/database.php";
+require_once "../../database/config/database.php";
 
 try {
     // Get database connection
@@ -14,6 +14,7 @@ try {
 
     // Check if columns exist and add them if missing
     $columns_to_add = [
+        'alt_text' => "ADD COLUMN alt_text VARCHAR(255) DEFAULT NULL AFTER mime_type",
         'caption' => "ADD COLUMN caption TEXT DEFAULT NULL AFTER alt_text",
         'updated_at' => "ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at"
     ];

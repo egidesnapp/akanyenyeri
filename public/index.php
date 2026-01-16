@@ -1,344 +1,282 @@
 <?php
-/**
- * Main Homepage for Akanyenyeri Magazine
- * Dynamic PHP version with database-driven content
- */
-
-
-
 require_once __DIR__ . '/../database/config/database.php';
 
 // Get database connection
 $pdo = getDB();
 
-// Fetch featured posts
-function getFeaturedPosts($pdo, $limit = 3) {
+// Function to get featured posts
+function getFeaturedPosts($pdo, $limit = 6) {
     try {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, p.views,
-                   u.full_name as author_name, c.name as category_name, c.color as category_color
-            FROM posts p
-            LEFT JOIN users u ON p.author_id = u.id
-            LEFT JOIN categories c ON p.category_id = c.id
-            WHERE p.status = 'published' AND p.is_featured = 1
-            ORDER BY p.created_at DESC
-            LIMIT ?
-        ");
-        $stmt->execute([$limit]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        return [];
-    }
-}
-
-// Fetch recent posts
-function getRecentPosts($pdo, $limit = 6) {
-    try {
-        $stmt = $pdo->prepare("
-            SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, p.views,
-                   u.full_name as author_name, c.name as category_name, c.color as category_color
+            SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug
             FROM posts p
             LEFT JOIN users u ON p.author_id = u.id
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.status = 'published'
-            ORDER BY p.created_at DESC
-            LIMIT ?
+            ORDER BY p.is_featured DESC, p.created_at DESC
+            LIMIT 10
         ");
-        $stmt->execute([$limit]);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return [];
     }
 }
 
-// Fetch popular posts
-function getPopularPosts($pdo, $limit = 4) {
+// Function to get categories with post counts
+function getCategoriesWithCounts($pdo) {
     try {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.title, p.slug, p.excerpt, p.featured_image, p.created_at, p.views,
-                   u.full_name as author_name, c.name as category_name, c.color as category_color
-            FROM posts p
-            LEFT JOIN users u ON p.author_id = u.id
-            LEFT JOIN categories c ON p.category_id = c.id
-            WHERE p.status = 'published'
-            ORDER BY p.views DESC
-            LIMIT ?
-        ");
-        $stmt->execute([$limit]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        return [];
-    }
-}
-
-// Fetch categories
-function getCategories($pdo) {
-    try {
-        $stmt = $pdo->query("
             SELECT c.*, COUNT(p.id) as post_count
             FROM categories c
             LEFT JOIN posts p ON c.id = p.category_id AND p.status = 'published'
             GROUP BY c.id
-            ORDER BY post_count DESC, c.name ASC
+            ORDER BY c.name ASC
         ");
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return [];
     }
 }
 
-// Get data
-$featuredPosts = getFeaturedPosts($pdo, 3);
-$recentPosts = getRecentPosts($pdo, 6);
-$popularPosts = getPopularPosts($pdo, 4);
-$categories = getCategories($pdo);
-
-// Helper functions
+// Function to format date
 function formatDate($date) {
-    return date('M j, Y', strtotime($date));
+    return date('F j, Y', strtotime($date));
 }
 
-function timeAgo($datetime) {
-    $time = time() - strtotime($datetime);
-    if ($time < 60) return 'just now';
-    if ($time < 3600) return floor($time/60) . ' min ago';
-    if ($time < 86400) return floor($time/3600) . ' hours ago';
-    if ($time < 2592000) return floor($time/86400) . ' days ago';
-    return formatDate($datetime);
+// Function to estimate read time
+function estimateReadTime($content, $wordsPerMinute = 200) {
+    $wordCount = str_word_count(strip_tags($content));
+    $minutes = ceil($wordCount / $wordsPerMinute);
+    return $minutes . ' min read';
 }
 
-function excerpt($text, $length = 150) {
-    if (strlen($text) <= $length) return $text;
-    return substr($text, 0, strrpos(substr($text, 0, $length), ' ')) . '...';
-}
+// Get featured posts and categories
+$featured_posts = getFeaturedPosts($pdo, 6);
+$categories = getCategoriesWithCounts($pdo);
 ?>
 
-<?php include_once __DIR__ . '/header.php'; ?>
+<?php include 'includes/head.php'; ?>
+<?php include 'includes/nav.php'; ?>
 
-<div class="site-content">
-    <div class="container-inner">
-        <!-- Magazine-Style Recent Posts Layout -->
-        <div class="magazine-hero" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 50px;">
-            <!-- Left: Main Recent Post (Large Square) -->
-            <div class="main-recent-post" data-aos="fade-right" style="position: relative; overflow: hidden; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <?php if (!empty($recentPosts) && isset($recentPosts[0])): $post = $recentPosts[0]; ?>
-                <div class="post-image-wrapper" style="position: relative; height: 400px; overflow: hidden;">
-                    <img
-                        src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/600x400/3498db/ffffff?text=Latest+News'); ?>"
-                        alt="<?php echo htmlspecialchars($post['title']); ?>"
-                        style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
-                    />
-                    <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);"></div>
-                </div>
-                <div class="post-content-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; color: white;">
-                    <span class="category-badge" style="background: <?php echo htmlspecialchars($post['category_color'] ?: '#3498db'); ?>; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 15px; display: inline-block; animation: slideInUp 0.8s ease-out;"><?php echo htmlspecialchars($post['category_name']); ?></span>
-                    <h2 class="animated-title" style="font-size: 2.2rem; font-weight: 700; margin: 0 0 15px 0; line-height: 1.2; animation: slideInUp 1s ease-out; animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards;">
-                        <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" style="color: white; text-decoration: none; transition: color 0.3s ease;">
-                            <?php echo htmlspecialchars($post['title']); ?>
-                        </a>
-                    </h2>
-                    <div class="post-meta" style="font-size: 0.9rem; opacity: 0.9; animation: slideInUp 1s ease-out; animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards;">
-                        <span><i class="fa fa-calendar"></i> <?php echo formatDate($post['created_at']); ?></span>
-                        <span style="margin-left: 15px;"><i class="fa fa-user"></i> <?php echo htmlspecialchars($post['author_name']); ?></span>
-                        <span style="margin-left: 15px;"><i class="fa fa-eye"></i> <?php echo number_format($post['views']); ?> views</span>
-                    </div>
-                </div>
-                <?php endif; ?>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1 class="hero-title fade-in" data-aos="fade-up">Urakazaneza ku AKANYENYERI</h1>
+                <p class="hero-subtitle typewriter" data-aos="fade-up" data-aos-delay="200">
+                    Your trusted source for breaking news, in-depth analysis, and compelling stories from around the globe.
+                </p>
+                <a href="#news" class="btn-custom fade-in" data-aos="fade-up" data-aos-delay="400">
+                    <i class="fas fa-newspaper me-2"></i>Explore Latest News
+                </a>
             </div>
+        </div>
+    </section>
 
-            <!-- Right: Two Recent Posts (Smaller Squares) -->
-            <div class="recent-posts-sidebar" style="display: flex; flex-direction: column; gap: 30px;">
-                <?php for($i=1; $i<=2; $i++): if(!empty($recentPosts) && isset($recentPosts[$i])): $post = $recentPosts[$i]; ?>
-                <div class="recent-square-post" data-aos="fade-left" data-aos-delay="<?php echo ($i-1) * 200; ?>" style="position: relative; overflow: hidden; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); height: 185px;">
-                    <div class="post-image-wrapper" style="position: relative; height: 100%; overflow: hidden;">
-                        <img
-                            src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/300x200/' . substr($post['category_color'] ?: '#3498db', 1) . '/ffffff?text=News'); ?>"
-                            alt="<?php echo htmlspecialchars($post['title']); ?>"
-                            style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
-                        />
-                        <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 100%);"></div>
-                    </div>
-                    <div class="post-content-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; color: white;">
-                        <span class="category-badge" style="background: <?php echo htmlspecialchars($post['category_color'] ?: '#3498db'); ?>; padding: 3px 10px; border-radius: 15px; font-size: 0.7rem; font-weight: 600; margin-bottom: 10px; display: inline-block; animation: slideInUp 0.8s ease-out; animation-delay: <?php echo 0.2 + ($i-1) * 0.2; ?>s; opacity: 0; animation-fill-mode: forwards;"><?php echo htmlspecialchars($post['category_name']); ?></span>
-                        <h3 class="animated-title" style="font-size: 1.1rem; font-weight: 600; margin: 0; line-height: 1.3; animation: slideInUp 0.8s ease-out; animation-delay: <?php echo 0.4 + ($i-1) * 0.2; ?>s; opacity: 0; animation-fill-mode: forwards;">
-                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" style="color: white; text-decoration: none; transition: color 0.3s ease;">
-                                <?php echo htmlspecialchars($post['title']); ?>
+
+
+    <!-- Featured News -->
+    <section class="featured-news" id="news">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">AKANYENYERI NEWS</h2>
+
+            <?php if (empty($featured_posts)): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                <h3>No posts available</h3>
+                <p>Please check back later for the latest news.</p>
+            </div>
+            <?php else: ?>
+
+            <!-- Special Layout for First Three Cards -->
+            <div class="row mb-5">
+
+                <!-- First Card - Large (Half Page) -->
+                <div class="col-lg-6 mb-4" data-aos="fade-up">
+                    <?php $post = $featured_posts[0]; ?>
+                    <div class="card h-100 featured-card-large no-hover">
+                        <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/800x400/3498db/ffffff?text=No+Image'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>" style="height: 350px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <span class="badge bg-primary"><?php echo htmlspecialchars($post['category_name']); ?></span>
+                                <small class="text-muted ms-2">
+                                    <i class="fas fa-calendar-alt me-1"></i><?php echo formatDate($post['created_at']); ?> |
+                                    <i class="fas fa-clock me-1"></i><?php echo estimateReadTime($post['content']); ?>
+                                </small>
+                            </div>
+                            <h4 class="card-title"><?php echo htmlspecialchars($post['title']); ?></h4>
+                            <p class="card-text"><?php echo htmlspecialchars($post['excerpt']); ?></p>
+                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom mt-auto align-self-start">
+                                <i class="fas fa-arrow-right me-2"></i>Read More
                             </a>
-                        </h3>
-                        <div class="post-meta" style="font-size: 0.8rem; opacity: 0.8; margin-top: 8px; animation: slideInUp 0.8s ease-out; animation-delay: <?php echo 0.6 + ($i-1) * 0.2; ?>s; opacity: 0; animation-fill-mode: forwards;">
-                            <span><i class="fa fa-clock"></i> <?php echo timeAgo($post['created_at']); ?></span>
                         </div>
                     </div>
                 </div>
-                <?php endif; endfor; ?>
-            </div>
-        </div>
 
-        <div class="row" style="display: flex; flex-wrap: wrap; gap: 30px; margin-top: 50px;">
-            <!-- Main Content Column -->
-            <div class="col-lg-8" style="flex: 2; min-width: 300px;">
-                <!-- Recent Posts -->
-                <section class="recent-posts">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
-                        <h2 class="section-title" style="margin: 0; font-size: 1.8rem;">Latest News</h2>
-                        <a href="archive.php" style="font-weight: 600;">View All <i class="fa fa-arrow-right"></i></a>
-                    </div>
-
-                    <div class="posts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
-                        <?php foreach ($recentPosts as $index => $post): ?>
-                        <article class="post-item" data-aos="fade-up" data-aos-delay="<?php echo $index * 100; ?>">
-                            <div class="post-img-wrap">
-                                <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>">
-                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x200'); ?>" class="post-img" alt="<?php echo htmlspecialchars($post['title']); ?>">
-                                </a>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <span class="category-badge" style="font-size: 0.75rem; margin-bottom: 10px;"><?php echo htmlspecialchars($post['category_name']); ?></span>
-                                    <h3 class="post-title">
-                                        <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>">
-                                            <?php echo htmlspecialchars($post['title']); ?>
-                                        </a>
-                                    </h3>
+                <!-- Second and Third Cards - Stacked on Right Side -->
+                <div class="col-lg-6 d-flex flex-column" style="gap: 1rem;">
+                    <!-- Second Card -->
+                    <div class="flex-fill" style="flex: 1 1 45%;" data-aos="fade-up" data-aos-delay="200">
+                        <?php $post = $featured_posts[1]; ?>
+                        <div class="card h-100 no-hover">
+                            <div class="row g-0 h-100">
+                                <div class="col-md-5 p-0">
+                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x300/27ae60/ffffff?text=No+Image'); ?>" class="w-100 h-100" alt="<?php echo htmlspecialchars($post['title']); ?>" style="object-fit: cover; border-radius: 20px 0 0 20px;">
                                 </div>
-                                <div class="post-excerpt">
-                                    <?php echo htmlspecialchars(excerpt($post['excerpt'] ?: strip_tags($post['title']), 100)); ?>
-                                </div>
-                                <div class="post-footer" style="margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
-                                    <div class="post-meta" style="font-size: 0.85rem; color: var(--text-muted);">
-                                        <span><i class="fa fa-clock"></i> <?php echo timeAgo($post['created_at']); ?></span>
+                                <div class="col-md-7 d-flex">
+                                    <div class="card-body d-flex flex-column p-3 w-100">
+                                        <div class="mb-2">
+                                            <span class="badge bg-success"><?php echo htmlspecialchars($post['category_name']); ?></span>
+                                        </div>
+                    <h6 class="card-title mb-2" style="font-size: 0.95rem; line-height: 1.3;"><?php echo htmlspecialchars($post['title']); ?></h6>
+                    <p class="card-text small mb-2" style="font-size: 0.8rem; line-height: 1.4;"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 60)) . (strlen($post['excerpt']) > 60 ? '...' : ''); ?></p>
+                    <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom btn-sm mt-auto align-self-start" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
+                        <i class="fas fa-arrow-right me-1"></i>Read More
+                    </a>
+                    <small class="text-muted" style="font-size: 0.7rem; margin-top: 0.5rem;">
+                        <i class="fas fa-clock me-1"></i><?php echo estimateReadTime($post['content']); ?>
+                    </small>
                                     </div>
-                                    <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="read-more-btn">Read More <i class="fa fa-arrow-right"></i></a>
                                 </div>
                             </div>
-                        </article>
-                        <?php endforeach; ?>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="col-lg-4" style="flex: 1; min-width: 300px;">
-                <aside class="sidebar">
-                    <!-- Popular Posts -->
-                    <?php if (!empty($popularPosts)): ?>
-                    <section class="popular-posts" data-aos="fade-left" data-aos-delay="200">
-                        <h3 class="sidebar-title">Most Popular</h3>
-                        <?php foreach ($popularPosts as $post): ?>
-                        <article class="sidebar-post">
-                            <div class="sidebar-post-image" style="background-image: url('<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/80x80/' . substr($post['category_color'] ?: '667eea', 1) . '/ffffff?text=' . substr($post['title'], 0, 1)); ?>')"></div>
-                            <div class="sidebar-post-content">
-                                <h4 class="sidebar-post-title">
-                                    <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>">
-                                        <?php echo htmlspecialchars($post['title']); ?>
-                                    </a>
-                                </h4>
-                                <div class="sidebar-post-meta">
-                                    <span><?php echo timeAgo($post['created_at']); ?></span> •
-                                    <span><?php echo number_format($post['views']); ?> views</span>
-                                </div>
-                            </div>
-                        </article>
-                        <?php endforeach; ?>
-                    </section>
-                    <?php endif; ?>
-
-                    <!-- Categories -->
-                    <?php if (!empty($categories)): ?>
-                    <section class="categories-widget" data-aos="fade-left" data-aos-delay="400">
-                        <h3 class="sidebar-title">Categories</h3>
-                        <div class="categories-grid">
-                            <?php foreach ($categories as $category): ?>
-                            <div class="category-card" style="border-left-color: <?php echo htmlspecialchars($category['color'] ?: '#667eea'); ?>">
-                                <div class="category-name">
-                                    <a href="category.php?slug=<?php echo htmlspecialchars($category['slug']); ?>" style="color: inherit; text-decoration: none;">
-                                        <?php echo htmlspecialchars($category['name']); ?>
-                                    </a>
-                                </div>
-                                <div class="category-count"><?php echo $category['post_count']; ?> articles</div>
-                            </div>
-                            <?php endforeach; ?>
                         </div>
-                    </section>
-                    <?php endif; ?>
-                </aside>
-            </div>
-        </div>
-    </div>
-</main>
+                    </div>
 
-<!-- Footer -->
-<footer class="site-footer">
-    <div class="container">
-        <div class="footer-content">
+                    <!-- Third Card -->
+                    <div class="flex-fill" style="flex: 1 1 45%;" data-aos="fade-up" data-aos-delay="400">
+                        <?php $post = $featured_posts[2]; ?>
+                        <div class="card h-100 no-hover">
+                            <div class="row g-0 h-100">
+                                <div class="col-md-5 p-0">
+                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x300/17a2b8/ffffff?text=No+Image'); ?>" class="w-100 h-100" alt="<?php echo htmlspecialchars($post['title']); ?>" style="object-fit: cover; border-radius: 20px 0 0 20px;">
+                                </div>
+                                <div class="col-md-7 d-flex">
+                                    <div class="card-body d-flex flex-column p-3 w-100">
+                                        <div class="mb-2">
+                                            <span class="badge bg-info"><?php echo htmlspecialchars($post['category_name']); ?></span>
+                                        </div>
+                                        <h6 class="card-title mb-2" style="font-size: 0.95rem; line-height: 1.3;"><?php echo htmlspecialchars($post['title']); ?></h6>
+                                        <p class="card-text small mb-2" style="font-size: 0.8rem; line-height: 1.4;"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 60)) . (strlen($post['excerpt']) > 60 ? '...' : ''); ?></p>
+                                        <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom btn-sm mt-auto align-self-start" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
+                                            <i class="fas fa-arrow-right me-1"></i>Read More
+                                        </a>
+                                        <small class="text-muted" style="font-size: 0.7rem; margin-top: 0.5rem;">
+                                            <i class="fas fa-clock me-1"></i><?php echo estimateReadTime($post['content']); ?>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remaining Cards - Standard Grid -->
             <div class="row">
-                <div class="col-md-4">
-                    <div class="footer-section">
-                        <h3>Akanyenyeri Magazine</h3>
-                        <p>Your trusted source for breaking news, in-depth analysis, and stories that matter. Stay informed with our daily coverage of politics, technology, sports, and more.</p>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="footer-section">
-                        <h4>Categories</h4>
-                        <ul class="footer-links">
-                            <?php foreach (array_slice($categories, 0, 5) as $category): ?>
-                            <li><a href="category.php?slug=<?php echo htmlspecialchars($category['slug']); ?>"><?php echo htmlspecialchars($category['name']); ?></a></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="footer-section">
-                        <h4>Quick Links</h4>
-                        <ul class="footer-links">
-                            <li><a href="index.php">Home</a></li>
-                            <li><a href="about.php">About Us</a></li>
-                            <li><a href="contact.php">Contact</a></li>
-                            <li><a href="privacy.php">Privacy Policy</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="footer-section">
-                        <h4>Stay Connected</h4>
-                        <p>Follow us for the latest updates and breaking news.</p>
-                        <div class="social-links">
-                            <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                <?php for($i = 3; $i < count($featured_posts); $i++): $post = $featured_posts[$i]; ?>
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="<?php echo ($i - 2) * 100; ?>">
+                    <div class="card h-100">
+                        <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x250/e74c3c/ffffff?text=No+Image'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>">
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <span class="badge bg-primary"><?php echo htmlspecialchars($post['category_name']); ?></span>
+                                <small class="text-muted ms-2">
+                                    <i class="fas fa-calendar-alt me-1"></i><?php echo formatDate($post['created_at']); ?> |
+                                    <i class="fas fa-clock me-1"></i><?php echo estimateReadTime($post['content']); ?>
+                                </small>
+                            </div>
+                            <h5 class="card-title"><?php echo htmlspecialchars($post['title']); ?></h5>
+                            <p class="card-text"><?php echo htmlspecialchars($post['excerpt']); ?></p>
+                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom mt-auto align-self-start">
+                                <i class="fas fa-arrow-right me-2"></i>Read More
+                            </a>
                         </div>
                     </div>
                 </div>
+                <?php endfor; ?>
             </div>
+            <?php endif; ?>
         </div>
-        <div class="footer-bottom">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p>&copy; <?php echo date('Y'); ?> Akanyenyeri Magazine. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p>Built with ❤️ for informed readers</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-</div>
+    </section>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-    AOS.init({
-        duration: 800,
-        easing: 'ease-out-cubic',
-        once: true,
-        offset: 50
-    });
-</script>
-<script src="../assets/js/theme.js"></script>
-</body>
-</html>
+    <!-- Categories Section -->
+    <section class="container my-5" id="categories">
+        <h2 class="section-title" data-aos="fade-up">Explore by Category</h2>
+        <div class="row">
+            <?php
+            // Define icons and colors for categories
+            $categoryIcons = [
+                'Politics' => 'fas fa-landmark',
+                'Sports' => 'fas fa-futbol',
+                'Technology' => 'fas fa-laptop-code',
+                'Business' => 'fas fa-chart-line',
+                'Entertainment' => 'fas fa-film',
+                'Health' => 'fas fa-heartbeat'
+            ];
+
+            $categoryColors = [
+                'Politics' => 'primary',
+                'Sports' => 'warning',
+                'Technology' => 'info',
+                'Business' => 'success',
+                'Entertainment' => 'danger',
+                'Health' => 'secondary'
+            ];
+
+            if (!empty($categories)):
+                foreach ($categories as $index => $category):
+                    $icon = $categoryIcons[$category['name']] ?? 'fas fa-folder';
+                    $color = $categoryColors[$category['name']] ?? 'primary';
+            ?>
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="<?php echo $index * 100; ?>">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="<?php echo $icon; ?> fa-3x text-<?php echo $color; ?>"></i>
+                        </div>
+                        <h5 class="card-title"><?php echo htmlspecialchars($category['name']); ?></h5>
+                        <p class="text-muted"><?php echo $category['post_count']; ?> articles</p>
+                        <a href="category.php?slug=<?php echo htmlspecialchars($category['slug']); ?>" class="btn btn-outline-<?php echo $color; ?>">
+                            <i class="fas fa-arrow-right me-2"></i>Explore
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <div class="col-12 text-center">
+                <p>No categories available.</p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="slide-in-left">
+                    <h3 class="mb-4">Stay Updated with Latest News</h3>
+                    <p class="mb-4">Subscribe to our newsletter and get the latest breaking news delivered directly to your inbox.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" class="form-control" placeholder="Enter your email address" required>
+                        <button type="submit" class="btn btn-custom w-100">
+                            <i class="fas fa-envelope me-2"></i>Subscribe Now
+                        </button>
+                    </form>
+                </div>
+                <div class="col-lg-6" data-aos="slide-in-right">
+                    <div class="text-center">
+                        <i class="fas fa-newspaper fa-5x text-primary mb-4"></i>
+                        <h4>Breaking News Alert</h4>
+                        <p>Get instant notifications for major stories</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<?php include 'includes/footer.php'; ?>

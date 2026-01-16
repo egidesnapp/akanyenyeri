@@ -3,7 +3,7 @@
  * Maintenance: backup posts and publish drafts / fix missing author/category
  * Access via browser: /admin/maintenance_publish.php
  */
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../database/config/database.php';
 $pdo = getDB();
 
 // Create backups dir
