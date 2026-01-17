@@ -98,6 +98,15 @@ $current_user = getCurrentUser();
                 </a>
             </li>
 
+            <li class="nav-item <?php echo $current_page === "advertisements"
+                ? "active"
+                : ""; ?>">
+                <a href="advertisements.php" class="nav-link">
+                    <i class="fas fa-ad"></i>
+                    <span>Advertisements</span>
+                </a>
+            </li>
+
             <!-- Organization Section -->
             <li class="nav-section">
                 <span class="section-title">Organization</span>
@@ -169,6 +178,22 @@ $current_user = getCurrentUser();
             </li>
             <?php endif; ?>
 
+            <!-- User Profile -->
+            <li class="nav-section">
+                <span class="section-title">Account</span>
+            </li>
+
+            <?php if (hasRole("admin")): ?>
+            <li class="nav-item <?php echo $current_page === "profile"
+                ? "active"
+                : ""; ?>">
+                <a href="profile.php" class="nav-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span>My Profile</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
             <!-- Analytics & Tools -->
             <li class="nav-section">
                 <span class="section-title">Tools</span>
@@ -206,7 +231,18 @@ $current_user = getCurrentUser();
     <div class="sidebar-footer">
         <div class="user-info">
             <div class="user-avatar">
-                <img src="../logo/akanyenyeri logo.png" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <?php if (!empty($current_user['profile_picture'])): ?>
+                    <img src="../uploads/<?php echo htmlspecialchars($current_user['profile_picture']); ?>"
+                         alt="User Avatar"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display: none; width: 100%; height: 100%; background: var(--primary-color, #2271b1); align-items: center; justify-content: center; color: white; font-weight: 600;">
+                        <?php echo strtoupper(substr($current_user['full_name'] ?? $current_user['username'] ?? 'U', 0, 1)); ?>
+                    </div>
+                <?php else: ?>
+                    <div style="width: 100%; height: 100%; background: var(--primary-color, #2271b1); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                        <?php echo strtoupper(substr($current_user['full_name'] ?? $current_user['username'] ?? 'U', 0, 1)); ?>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="user-details">
                 <div class="user-name"><?php echo htmlspecialchars(
@@ -225,8 +261,9 @@ $current_user = getCurrentUser();
             <a href="../public/index.php" class="action-btn" title="View Site" target="_blank">
                 <i class="fas fa-external-link-alt"></i>
             </a>
-            <a href="php/logout.php" class="action-btn" title="Logout">
+            <a href="php/logout.php" class="action-btn logout-btn" title="Logout">
                 <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
             </a>
         </div>
     </div>
@@ -636,6 +673,14 @@ $current_user = getCurrentUser();
     justify-content: center;
     color: white;
     font-size: 1.1rem;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .user-details {
@@ -679,6 +724,33 @@ $current_user = getCurrentUser();
 .action-btn:hover {
     background: rgba(255,255,255,0.2);
     color: #f0f0f1;
+}
+
+.logout-btn {
+    background: #dc3545 !important;
+    color: white !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+    border-radius: 6px !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.logout-btn:hover {
+    background: #c82333 !important;
+    color: white !important;
+    transform: none !important;
+}
+
+.logout-btn i {
+    font-size: 1rem !important;
+}
+
+.logout-btn span {
+    font-weight: 600;
 }
 
 /* Mobile responsiveness */

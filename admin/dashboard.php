@@ -12,11 +12,32 @@ require_once "php/dashboard_data.php";
 requireAuth();
 
 // Get dashboard data
-$stats = $dashboard->getDashboardSummary();
-$quickStats = $dashboard->getQuickStats();
+try {
+    $stats = $dashboard->getDashboardSummary();
+    $quickStats = $dashboard->getQuickStats();
+} catch (Exception $e) {
+    error_log("Dashboard data error: " . $e->getMessage());
+    // Provide fallback empty data
+    $stats = [
+        'total_posts' => 0,
+        'published_posts' => 0,
+        'draft_posts' => 0,
+        'total_comments' => 0,
+        'pending_comments' => 0,
+        'total_users' => 0,
+        'total_views' => 0,
+        'posts_by_category' => [],
+        'recent_posts' => [],
+        'popular_posts' => [],
+        'top_authors' => [],
+        'recent_comments' => []
+    ];
+    $quickStats = ['views' => ['average' => 0]];
+}
 
 // Get current user info
 $current_user = getCurrentUser();
+$totalCategoryPosts = array_sum(array_column($stats["posts_by_category"] ?? [], "post_count"));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -417,6 +438,20 @@ $current_user = getCurrentUser();
                         <div class="quick-action-title">Analytics</div>
                         <div class="quick-action-desc">View site statistics</div>
                     </a>
+                    <a href="advertisements.php" class="quick-action-card">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-ad"></i>
+                        </div>
+                        <div class="quick-action-title">Advertisements</div>
+                        <div class="quick-action-desc">Manage site ads</div>
+                    </a>
+                    <a href="users.php" class="quick-action-card">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="quick-action-title">Users</div>
+                        <div class="quick-action-desc">Manage user accounts</div>
+                    </a>
                 </div>
 
                 <!-- Statistics Cards -->
@@ -495,6 +530,11 @@ $current_user = getCurrentUser();
                             </h3>
                             <div class="chart-container">
                                 <canvas id="categoryChart"></canvas>
+                                <!-- Fallback display if chart fails -->
+                                <div id="chart-fallback" style="display: none; padding: 20px; text-align: center; color: #666;">
+                                    <h4>Content Distribution Data:</h4>
+                                    <div id="chart-data-display"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -680,7 +720,7 @@ $current_user = getCurrentUser();
     <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Mobile sidebar toggle
         function toggleMobileSidebar() {
@@ -700,54 +740,87 @@ $current_user = getCurrentUser();
         });
 
         // Category Distribution Chart
-        <?php if (!empty($stats["posts_by_category"])): ?>
-        const categoryData = <?= json_encode($stats["posts_by_category"]) ?>;
-        const ctx = document.getElementById('categoryChart').getContext('2d');
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (!empty($stats["posts_by_category"])): ?>
+            console.log('Chart data available:', <?= json_encode($stats["posts_by_category"]) ?>);
+            const categoryData = <?= json_encode($stats["posts_by_category"]) ?>;
+            const ctx = document.getElementById('categoryChart');
 
-        const categoryChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: categoryData.map(item => item.name),
-                datasets: [{
-                    data: categoryData.map(item => item.post_count),
-                    backgroundColor: categoryData.map(item => item.color || '#3182ce'),
-                    borderWidth: 3,
-                    borderColor: '#fff',
-                    hoverBorderWidth: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            font: {
-                                family: 'Inter',
-                                size: 12
+            if (ctx) {
+                console.log('Canvas element found');
+                const chartCtx = ctx.getContext('2d');
+
+                try {
+                    const categoryChart = new Chart(chartCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: categoryData.map(item => item.name),
+                            datasets: [{
+                                data: categoryData.map(item => item.post_count),
+                                backgroundColor: categoryData.map(item => item.color || '#3182ce'),
+                                borderWidth: 3,
+                                borderColor: '#fff',
+                                hoverBorderWidth: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true,
+                                        font: {
+                                            family: 'Inter',
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((context.parsed / total) * 100);
+                                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true
                             }
                         }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((context.parsed / total) * 100);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
+                    });
+                    console.log('Chart created successfully');
+                } catch (error) {
+                    console.error('Chart creation failed:', error);
+                    // Show fallback
+                    document.getElementById('categoryChart').style.display = 'none';
+                    document.getElementById('chart-fallback').style.display = 'block';
+                    const dataDisplay = document.getElementById('chart-data-display');
+                    dataDisplay.innerHTML = categoryData.map(item =>
+                        `<div>${item.name}: ${item.post_count} posts</div>`
+                    ).join('');
                 }
+            } else {
+                console.error('Canvas element not found');
+                // Show fallback
+                document.getElementById('categoryChart').style.display = 'none';
+                document.getElementById('chart-fallback').style.display = 'block';
+                const dataDisplay = document.getElementById('chart-data-display');
+                dataDisplay.innerHTML = '<div>Canvas element not found, but data is available.</div>';
             }
+            <?php else: ?>
+            console.log('No chart data available');
+            // Show fallback with message
+            document.getElementById('categoryChart').style.display = 'none';
+            document.getElementById('chart-fallback').style.display = 'block';
+            document.getElementById('chart-fallback').innerHTML = '<h4>No Data Available</h4><p>No posts found in the database.</p>';
+            <?php endif; ?>
         });
-        <?php endif; ?>
 
         // Auto refresh dashboard data every 5 minutes
         setInterval(function() {

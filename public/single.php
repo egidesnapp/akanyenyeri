@@ -61,57 +61,70 @@ $recentPosts = getRecentPosts($pdo);
 function formatDate($date) { return date('F j, Y', strtotime($date)); }
 ?>
 
-<?php include_once __DIR__ . '/header.php'; ?>
+<?php include 'includes/head.php'; ?>
+<?php include 'includes/nav.php'; ?>
 
-<div class="site-content">
-    <div class="container-inner">
-        <main id="primary" class="site-main">
-            <nav class="breadcrumbs">
-                <ul class="trail-items">
-                    <li><a href="index.php"><i class="fa fa-home"></i> Home</a></li>
-                    <li><a href="category.php?slug=<?php echo htmlspecialchars($post['category_slug']); ?>"><?php echo htmlspecialchars($post['category_name']); ?></a></li>
-                    <li class="trail-end"><?php echo htmlspecialchars($post['title']); ?></li>
+    <!-- Single Post Section -->
+    <section class="single-post-section" style="padding: 6rem 0 3rem; background: var(--featured-bg);">
+        <div class="container">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumbs mb-4" style="background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <ul class="trail-items" style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center;">
+                    <li style="margin-right: 0.5rem;"><a href="index.php" style="color: var(--primary-color); text-decoration: none;"><i class="fa fa-home"></i> Home</a></li>
+                    <li style="margin-right: 0.5rem;"><a href="category.php?slug=<?php echo htmlspecialchars($post['category_slug']); ?>" style="color: var(--primary-color); text-decoration: none;"><?php echo htmlspecialchars($post['category_name']); ?></a></li>
+                    <li class="trail-end" style="color: #374151; font-weight: 500;"><?php echo htmlspecialchars($post['title']); ?></li>
                 </ul>
             </nav>
 
-            <article class="post">
-                <header class="entry-header">
-                    <div class="cat-links">
-                        <a href="category.php?slug=<?php echo htmlspecialchars($post['category_slug']); ?>"><?php echo htmlspecialchars($post['category_name']); ?></a>
-                    </div>
-                    <h1 class="entry-title"><?php echo htmlspecialchars($post['title']); ?></h1>
-                    <div class="entry-meta">
-                        <span class="byline"><i class="fa fa-user"></i> <?php echo htmlspecialchars($post['author_name']); ?></span>
-                        <span class="posted-on"><i class="fa fa-calendar"></i> <?php echo formatDate($post['created_at']); ?></span>
-                        <span class="views"><i class="fa fa-eye"></i> <?php echo $post['views']; ?> Views</span>
-                    </div>
-                </header>
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <article class="single-post card" style="border: none; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); background: white; padding: 2rem;" data-aos="fade-up">
+                        <header class="post-header mb-4">
+                            <div class="mb-3">
+                                <span class="badge bg-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Sports</span>
+                            </div>
+                            <h1 class="post-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #1f2937; line-height: 1.2; margin-bottom: 1rem;"><?php echo htmlspecialchars($post['title']); ?></h1>
+                            <div class="post-meta" style="display: flex; align-items: center; gap: 1rem; color: #6b7280; font-size: 0.9rem;">
+                                <span><i class="fas fa-user me-1"></i><?php echo htmlspecialchars($post['author_name']); ?></span>
+                                <span><i class="fas fa-calendar me-1"></i><?php echo formatDate($post['created_at']); ?></span>
+                                <span><i class="fas fa-eye me-1"></i><?php echo $post['views']; ?> Views</span>
+                            </div>
+                        </header>
 
-                <?php if ($post['featured_image']): ?>
-                <div class="post-thumbnail">
-                    <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
+                        <?php if ($post['featured_image']): ?>
+                        <div class="post-thumbnail mb-4">
+                            <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>" class="img-fluid rounded" style="width: 100%; height: auto; max-height: 500px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="post-content" style="font-size: 1.1rem; line-height: 1.8; color: #374151;">
+                            <?php echo nl2br(htmlspecialchars_decode($post['content'])); ?>
+                        </div>
+                    </article>
                 </div>
-                <?php endif; ?>
 
-                <div class="entry-content">
-                    <?php echo nl2br(htmlspecialchars_decode($post['content'])); ?>
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <aside class="sidebar">
+                        <!-- Recent Posts Widget -->
+                        <div class="card mb-4" style="border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: white;" data-aos="fade-up" data-aos-delay="200">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-family: 'Playfair Display', serif; font-weight: 600; color: #1f2937; margin-bottom: 1rem;">Recent Posts</h5>
+                                <ul class="list-unstyled">
+                                    <?php foreach ($recentPosts as $recent): ?>
+                                    <li class="mb-3" style="border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
+                                        <a href="single.php?slug=<?php echo htmlspecialchars($recent['slug']); ?>" style="text-decoration: none; color: #374151; font-weight: 500; display: block; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#374151'"><?php echo htmlspecialchars($recent['title']); ?></a>
+                                        <small style="color: #6b7280;"><?php echo formatDate($recent['created_at']); ?></small>
+                                    </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>
                 </div>
-            </article>
-        </main>
+            </div>
+        </div>
+    </section>
 
-        <aside id="secondary" class="widget-area">
-            <section class="widget">
-                <h2 class="widget-title">Recent Posts</h2>
-                <ul>
-                    <?php foreach ($recentPosts as $recent): ?>
-                    <li>
-                        <a href="single.php?slug=<?php echo htmlspecialchars($recent['slug']); ?>"><?php echo htmlspecialchars($recent['title']); ?></a>
-                    </li>
-                    <?php endforeach; ?>
-                </ul>
-            </section>
-        </aside>
-    </div>
-</div>
-
-<?php include_once __DIR__ . '/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>

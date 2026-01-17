@@ -96,10 +96,8 @@ class AuthCheck
                 return false;
             }
 
-            // Check if user still has admin privileges
-            if (!in_array($user["role"], ["admin", "editor"])) {
-                return false;
-            }
+            // Allow all active users (admin, editor, author) to stay logged in
+            // Role restrictions are handled at the page level, not authentication level
 
             // Update session role if it changed
             if ($user["role"] !== $_SESSION["admin_role"]) {
@@ -358,9 +356,155 @@ class AuthCheck
                 exit();
             }
 
-            // Regular request - show error page or redirect
-            die("<h1>Access Denied</h1><p>$error_message</p>");
+            // Regular request - show styled access denied page
+            $this->showAccessDeniedPage($error_message);
         }
+    }
+
+    /**
+     * Show a nicely formatted access denied page with admin layout
+     */
+    private function showAccessDeniedPage($message = "You don't have permission to access this page")
+    {
+        $current_user = $this->getCurrentUser();
+        $page_title = "Access Denied";
+
+        // Start output buffering
+        ob_start();
+        ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($page_title); ?> - Akanyenyeri Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Include Sidebar -->
+        <?php include __DIR__ . "/../includes/sidebar.php"; ?>
+
+        <div class="main-content">
+            <!-- Include Header -->
+            <?php include __DIR__ . "/../includes/header.php"; ?>
+
+            <div class="content-area">
+                <div class="content-header">
+                    <h1><i class="fas fa-shield-alt"></i> Access Denied</h1>
+                </div>
+
+                <div class="error-page" style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 60vh;
+                    text-align: center;
+                    padding: 2rem;
+                ">
+                    <div class="error-icon" style="
+                        font-size: 6rem;
+                        color: #dc3545;
+                        margin-bottom: 2rem;
+                        opacity: 0.7;
+                    ">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+
+                    <h1 style="
+                        font-size: 3rem;
+                        font-weight: 700;
+                        color: #1d2327;
+                        margin-bottom: 1rem;
+                        line-height: 1.2;
+                    ">Access Denied</h1>
+
+                    <p style="
+                        font-size: 1.25rem;
+                        color: #646970;
+                        margin-bottom: 2rem;
+                        max-width: 600px;
+                        line-height: 1.6;
+                    "><?php echo htmlspecialchars($message); ?></p>
+
+                    <div class="error-actions" style="
+                        display: flex;
+                        gap: 1rem;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                    ">
+                        <a href="dashboard.php" class="btn btn-primary" style="
+                            padding: 0.75rem 2rem;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        ">
+                            <i class="fas fa-home"></i>
+                            Go to Dashboard
+                        </a>
+
+                        <a href="profile.php" class="btn btn-outline" style="
+                            padding: 0.75rem 2rem;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            background: transparent;
+                            border: 2px solid #3182ce;
+                            color: #3182ce;
+                            text-decoration: none;
+                        ">
+                            <i class="fas fa-user"></i>
+                            View Profile
+                        </a>
+                    </div>
+
+                    <div class="error-details" style="
+                        margin-top: 3rem;
+                        padding: 1.5rem;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8f0;
+                        max-width: 500px;
+                    ">
+                        <h4 style="
+                            margin: 0 0 0.5rem 0;
+                            color: #2d3748;
+                            font-size: 1rem;
+                            font-weight: 600;
+                        ">Account Information</h4>
+                        <div style="color: #646970; font-size: 0.9rem;">
+                            <strong>Logged in as:</strong> <?php echo htmlspecialchars($current_user['full_name'] ?? 'Unknown'); ?><br>
+                            <strong>Role:</strong> <?php echo htmlspecialchars($current_user['role'] ?? 'Unknown'); ?><br>
+                            <strong>Username:</strong> <?php echo htmlspecialchars($current_user['username'] ?? 'Unknown'); ?>
+                        </div>
+                    </div>
+
+                    <div class="error-help" style="
+                        margin-top: 2rem;
+                        font-size: 0.9rem;
+                        color: #718096;
+                        max-width: 500px;
+                    ">
+                        If you believe this is an error, please contact your administrator or try logging out and logging back in.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+        <?php
+        // Output the page and exit
+        ob_end_flush();
+        exit();
     }
 }
 

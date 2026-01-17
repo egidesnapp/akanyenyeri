@@ -216,6 +216,37 @@ function createTables($pdo)
         )
     ");
 
+    // Password Reset Tokens table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            token VARCHAR(255) UNIQUE NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            used BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_token (token),
+            INDEX idx_user_email (user_id, email),
+            INDEX idx_expires (expires_at)
+        )
+    ");
+
+    // User Security Questions table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS user_security_questions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            question VARCHAR(255) NOT NULL,
+            answer_hash VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE KEY unique_user_question (user_id, question)
+        )
+    ");
+
     // Security Logs table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS security_logs (

@@ -4,6 +4,13 @@
  * Checks all connections, database, files, and system health
  */
 
+session_start();
+require_once 'admin/php/auth_check.php';
+
+// Require authentication and admin role
+requireAuth();
+requireRole('admin', 'You need admin privileges to access system status');
+
 // Set error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -160,11 +167,11 @@ function testFrontendFiles() {
     global $warnings, $success_messages;
 
     $frontend_files = [
-        'index.php' => 'Dynamic homepage',
-        'index.html' => 'Static homepage (backup)',
-        'database/config/database.php' => 'Database configuration',
-        'css/dark-theme.css' => 'Theme styles',
-        'js/theme.js' => 'Theme scripts'
+        'index.php' => 'Main entry point',
+        'public/index.php' => 'Public homepage',
+        'public/includes/head.php' => 'Public head include',
+        'public/includes/nav.php' => 'Public navigation include',
+        'public/includes/footer.php' => 'Public footer include'
     ];
 
     $missing_files = [];
@@ -178,15 +185,16 @@ function testFrontendFiles() {
         }
     }
 
-    if (count($missing_files) <= 1) { // Allow 1 missing file (either index.php or index.html)
+    if (empty($missing_files)) {
         $success_messages[] = "Frontend files ready ($existing_files files)";
         return true;
-    } else {
-        foreach ($missing_files as $missing) {
-            $warnings[] = "Missing frontend file: $missing";
-        }
-        return false;
     }
+
+    foreach ($missing_files as $missing) {
+        $warnings[] = "Missing frontend file: $missing";
+    }
+
+    return false;
 }
 
 function testDirectories() {
@@ -196,8 +204,7 @@ function testDirectories() {
         'uploads' => 'Media uploads',
         'uploads/images' => 'Image uploads',
         'admin' => 'Admin panel',
-        'admin/php' => 'Admin PHP scripts',
-        'config' => 'Configuration files'
+        'admin/php' => 'Admin PHP scripts'
     ];
 
     $issues = [];
@@ -218,12 +225,13 @@ function testDirectories() {
     if (empty($issues)) {
         $success_messages[] = "All directories ready ($good_dirs directories)";
         return true;
-    } else {
-        foreach ($issues as $issue) {
-            $warnings[] = $issue;
-        }
-        return false;
     }
+
+    foreach ($issues as $issue) {
+        $warnings[] = $issue;
+    }
+
+    return false;
 }
 
 function testURLAccess() {
@@ -517,7 +525,7 @@ $overall_status = $php_ok && $config_ok && $mysql_ok && $admin_files_ok && $fron
     <div class="dashboard">
         <div class="header">
             <div class="logo">
-                <i class="fas fa-newspaper"></i>
+                <img src="logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 48px; width: auto; margin-right: 10px; vertical-align: middle;">
                 Akanyenyeri Magazine
             </div>
             <div class="subtitle">System Status Dashboard</div>

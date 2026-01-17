@@ -631,9 +631,9 @@ $currentUser = getCurrentUser();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Audit - Akanyenyeri Admin</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/admin-style.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-layout.css">
+    <link rel="stylesheet" href="css/admin.css">
     <style>
         .security-score {
             font-size: 3rem;
@@ -650,102 +650,110 @@ $currentUser = getCurrentUser();
         .severity-INFO { color: #17a2b8; }
         .audit-loading { display: none; }
         .recommendation-item { margin-bottom: 0.5rem; }
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem; }
+        .text-success { color: #28a745; }
+        .text-muted { color: #6c757d; }
+        .text-capitalize { text-transform: capitalize; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .ms-3 { margin-left: 1rem; }
+        .ms-2 { margin-left: 0.5rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .list-unstyled { list-style: none; padding-left: 0; }
+        .text-warning { color: #ffc107; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
+    <div class="admin-wrapper">
+        <!-- Include Sidebar -->
+        <?php include "includes/sidebar.php"; ?>
 
-    <div class="container-fluid">
-        <div class="row">
-            <?php include 'includes/sidebar.php'; ?>
+        <div class="main-content">
+            <!-- Include Header -->
+            <?php include "includes/header.php"; ?>
 
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><i class="fas fa-shield-alt"></i> Security Audit</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <button class="btn btn-primary" id="runAudit">
-                            <i class="fas fa-search"></i> Run Security Audit
-                        </button>
+            <div class="content-area">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="page-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Audit
                     </div>
+                    <button class="btn btn-primary" id="runAudit">
+                        <i class="fas fa-search"></i> Run Security Audit
+                    </button>
                 </div>
 
                 <!-- Loading indicator -->
-                <div class="audit-loading">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-3">Running security audit...</p>
-                    </div>
+                <div class="audit-loading" style="text-align: center; padding: 3rem;">
+                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 1rem; color: #666;">Running security audit...</p>
                 </div>
 
                 <!-- Audit Results -->
                 <div id="auditResults" style="display: none;">
                     <!-- Security Score -->
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Security Score</h5>
-                                    <div class="security-score" id="securityScore">-</div>
-                                    <p class="card-text">Grade: <span id="securityGrade" class="badge">-</span></p>
-                                </div>
-                            </div>
+                    <div class="stats-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card" style="text-align: center;">
+                            <h5 style="margin-bottom: 1rem; color: #2d3748;">Security Score</h5>
+                            <div class="security-score" id="securityScore">-</div>
+                            <p style="margin-top: 0.5rem;">Grade: <span id="securityGrade" class="badge">-</span></p>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total Issues</h5>
-                                    <div class="security-score text-warning" id="totalIssues">-</div>
-                                    <p class="card-text">Found during audit</p>
-                                </div>
-                            </div>
+
+                        <div class="stat-card" style="text-align: center;">
+                            <h5 style="margin-bottom: 1rem; color: #2d3748;">Total Issues</h5>
+                            <div class="security-score" style="color: #d69e2e;" id="totalIssues">-</div>
+                            <p style="margin-top: 0.5rem; color: #718096;">Found during audit</p>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Last Audit</h5>
-                                    <div class="h4" id="lastAudit">Just now</div>
-                                    <p class="card-text">Audit completed</p>
-                                </div>
-                            </div>
+
+                        <div class="stat-card" style="text-align: center;">
+                            <h5 style="margin-bottom: 1rem; color: #2d3748;">Last Audit</h5>
+                            <div style="font-size: 1.5rem; font-weight: 600; color: #2d3748;" id="lastAudit">Just now</div>
+                            <p style="margin-top: 0.5rem; color: #718096;">Audit completed</p>
                         </div>
                     </div>
 
-                    <!-- Security Findings -->
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5><i class="fas fa-exclamation-triangle"></i> Security Findings</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div id="securityFindings">
-                                        <p class="text-muted">No audit results yet. Click "Run Security Audit" to begin.</p>
-                                    </div>
-                                </div>
+                    <!-- Security Findings and Recommendations -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                        <div class="dashboard-section">
+                            <h3 style="margin-bottom: 1rem; color: #2d3748;"><i class="fas fa-exclamation-triangle"></i> Security Findings</h3>
+                            <div id="securityFindings">
+                                <p style="color: #718096;">No audit results yet. Click "Run Security Audit" to begin.</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5><i class="fas fa-lightbulb"></i> Recommendations</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div id="recommendations">
-                                        <p class="text-muted">Recommendations will appear after audit.</p>
-                                    </div>
-                                </div>
+
+                        <div class="dashboard-section">
+                            <h3 style="margin-bottom: 1rem; color: #2d3748;"><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                            <div id="recommendations">
+                                <p style="color: #718096;">Recommendations will appear after audit.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 
-    <script src="js/bootstrap.bundle.min.js"></script>
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <script src="js/admin.js"></script>
     <script>
+        // Mobile sidebar toggle
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+            }
+        }
+
         document.getElementById('runAudit').addEventListener('click', function() {
             const button = this;
             const loading = document.querySelector('.audit-loading');

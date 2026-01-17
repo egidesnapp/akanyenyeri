@@ -8,8 +8,9 @@ session_start();
 require_once "php/auth_check.php";
 require_once "php/dashboard_data.php";
 
-// Require authentication
+// Require authentication and admin role
 requireAuth();
+requireRole('admin', 'You need admin privileges to access analytics');
 
 // Get database connection
 $pdo = getDB();
@@ -20,11 +21,16 @@ if (isset($_GET["action"]) && $_GET["action"] === "get_realtime_data") {
 
     try {
         $realtime_data = [
-            "current_online" => rand(5, 25), // Simulated online users
+            "current_online" => 0, // Real online users count
             "today_posts" => 0,
             "today_comments" => 0,
             "today_views" => 0,
         ];
+
+        // Real online users (active users in database)
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE status = 'active'");
+        $stmt->execute();
+        $realtime_data["current_online"] = $stmt->fetchColumn();
 
         // Today's posts
         $stmt = $pdo->prepare(
@@ -40,9 +46,9 @@ if (isset($_GET["action"]) && $_GET["action"] === "get_realtime_data") {
         $stmt->execute();
         $realtime_data["today_comments"] = $stmt->fetchColumn();
 
-        // Today's total views (approximate)
+        // Today's actual views (from posts created today, not inflated sample data)
         $stmt = $pdo->prepare(
-            "SELECT SUM(views) FROM posts WHERE DATE(updated_at) = CURDATE()",
+            "SELECT SUM(views) FROM posts WHERE DATE(created_at) = CURDATE() AND status = 'published'",
         );
         $stmt->execute();
         $realtime_data["today_views"] = $stmt->fetchColumn() ?: 0;
@@ -115,29 +121,8 @@ try {
     $daily_stats = [];
 }
 
-// Additional analytics data (simulated for demo)
-$traffic_sources = [
-    [
-        "source" => "Direct",
-        "visitors" => rand(150, 300),
-        "percentage" => 45,
-    ],
-    [
-        "source" => "Search Engines",
-        "visitors" => rand(100, 200),
-        "percentage" => 30,
-    ],
-    [
-        "source" => "Social Media",
-        "visitors" => rand(50, 150),
-        "percentage" => 15,
-    ],
-    [
-        "source" => "Referrals",
-        "visitors" => rand(20, 80),
-        "percentage" => 10,
-    ],
-];
+// Traffic sources - not implemented yet (would require tracking user sessions/referrers)
+$traffic_sources = null;
 
 // Get current user info
 $current_user = getCurrentUser();
@@ -741,31 +726,13 @@ function timeAgo($datetime)
                             <?php endif; ?>
                         </div>
 
-                        <!-- Traffic Sources -->
+                        <!-- Traffic Sources - Not implemented yet -->
                         <div class="traffic-sources">
                             <h3><i class="fas fa-globe"></i> Traffic Sources</h3>
-                            <?php foreach ($traffic_sources as $source): ?>
-                            <div class="traffic-item">
-                                <div>
-                                    <strong><?php echo $source[
-                                        "source"
-                                    ]; ?></strong>
-                                    <div class="traffic-bar">
-                                        <div class="traffic-fill" style="width: <?php echo $source[
-                                            "percentage"
-                                        ]; ?>%"></div>
-                                    </div>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div><?php echo $source[
-                                        "visitors"
-                                    ]; ?> visitors</div>
-                                    <div style="color: #64748b; font-size: 0.9rem;"><?php echo $source[
-                                        "percentage"
-                                    ]; ?>%</div>
-                                </div>
+                            <div class="no-data">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>Traffic source tracking not implemented yet.<br>Would require session/referrer logging.</p>
                             </div>
-                            <?php endforeach; ?>
                         </div>
                     </div>
 

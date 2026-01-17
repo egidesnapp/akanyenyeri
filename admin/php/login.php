@@ -40,14 +40,8 @@ class AdminAuth
 
             // Verify user exists and password is correct
             if ($user && password_verify($password, $user["password"])) {
-                // Check if user has admin privileges
-                if (in_array($user["role"], ["admin", "editor"])) {
-                    return $user;
-                } else {
-                    return [
-                        "error" => "Access denied. Admin privileges required.",
-                    ];
-                }
+                // Allow all active users to log in
+                return $user;
             } else {
                 return ["error" => "Invalid username/email or password."];
             }

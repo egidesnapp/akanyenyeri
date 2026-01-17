@@ -8,8 +8,9 @@ session_start();
 require_once 'php/auth_check.php';
 require_once '../database/config/database.php';
 
-// Require authentication
+// Require authentication and admin role
 requireAuth();
+requireRole('admin', 'You need admin privileges to manage your profile');
 
 // Get database connection
 $pdo = getDB();
@@ -17,6 +18,13 @@ $pdo = getDB();
 // Get current user
 $current_user = getCurrentUser();
 $user_id = $current_user['id'];
+
+// Get created_at and password separately since getCurrentUser() doesn't include them
+$stmt = $pdo->prepare("SELECT created_at, password FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+$user_created_at = $user_data['created_at'];
+$current_password_hash = $user_data['password'];
 
 // Handle form submissions
 $success_message = '';
@@ -30,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             throw new Exception('Invalid security token');
         }
 
+        $username = trim($_POST['username'] ?? '');
         $full_name = trim($_POST['full_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $current_password = $_POST['current_password'] ?? '';
@@ -37,6 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         $confirm_password = $_POST['confirm_password'] ?? '';
 
         // Validation
+        if (empty($username)) {
+            throw new Exception('Username is required');
+        }
+
         if (empty($full_name)) {
             throw new Exception('Full name is required');
         }
@@ -47,6 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception('Invalid email address');
+        }
+
+        // Check if username already exists (excluding current user)
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
+        $stmt->execute([$username, $user_id]);
+        if ($stmt->fetch()) {
+            throw new Exception('Username already in use');
         }
 
         // Check if email already exists (excluding current user)
@@ -62,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 throw new Exception('Current password required to change password');
             }
 
-            if (!password_verify($current_password, $current_user['password'])) {
+            if (!password_verify($current_password, $current_password_hash)) {
                 throw new Exception('Current password is incorrect');
             }
 
@@ -76,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
 
         // Update profile
-        $update_query = "UPDATE users SET full_name = ?, email = ?, updated_at = NOW()";
-        $params = [$full_name, $email];
+        $update_query = "UPDATE users SET username = ?, full_name = ?, email = ?, updated_at = NOW()";
+        $params = [$username, $full_name, $email];
 
         // Handle profile picture upload
         if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
@@ -232,7 +252,7 @@ if (!empty($current_user['profile_picture'])) {
                             </div>
                             <div class="profile-info-item">
                                 <div class="profile-info-label">Member Since</div>
-                                <div class="profile-info-value"><?php echo date('M d, Y', strtotime($current_user['created_at'])); ?></div>
+                                <div class="profile-info-value"><?php echo date('M d, Y', strtotime($user_created_at)); ?></div>
                             </div>
                         </div>
                     </div>
@@ -246,6 +266,11 @@ if (!empty($current_user['profile_picture'])) {
                         <!-- Personal Information -->
                         <div class="form-section">
                             <h3><i class="fas fa-user"></i> Personal Information</h3>
+
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($current_user['username']); ?>" required>
+                            </div>
 
                             <div class="form-group">
                                 <label for="full_name">Full Name</label>

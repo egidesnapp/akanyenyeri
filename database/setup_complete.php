@@ -17,7 +17,7 @@ try {
     // Disable foreign key checks to allow dropping tables with dependencies
     $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
 
-    $tables = ['security_logs', 'user_remember_tokens', 'post_tags', 'media', 'posts', 'tags', 'categories', 'site_settings', 'users'];
+    $tables = ['security_logs', 'user_remember_tokens', 'post_tags', 'media', 'posts', 'tags', 'categories', 'site_settings', 'advertisements', 'users'];
     foreach ($tables as $table) {
         try {
             $pdo->exec("DROP TABLE IF EXISTS `$table`");
@@ -171,6 +171,29 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Created security_logs table\n";
+
+    // Create advertisements table
+    $pdo->exec("
+        CREATE TABLE advertisements (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            image_path VARCHAR(500) NOT NULL,
+            link_url VARCHAR(500),
+            category VARCHAR(100),
+            display_order INT DEFAULT 0,
+            is_active BOOLEAN DEFAULT TRUE,
+            start_date TIMESTAMP NULL,
+            end_date TIMESTAMP NULL,
+            created_by INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_active (is_active),
+            INDEX idx_category (category),
+            INDEX idx_display_order (display_order)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    echo "✓ Created advertisements table\n";
 
     echo "\n👤 Inserting sample data...\n";
 

@@ -197,7 +197,7 @@ class DashboardData
             $stmt = $this->pdo->query("
                 SELECT c.name, c.color, COUNT(p.id) as post_count
                 FROM categories c
-                LEFT JOIN posts p ON c.id = p.category_id AND p.status = 'published'
+                LEFT JOIN posts p ON c.id = p.category_id
                 GROUP BY c.id, c.name, c.color
                 ORDER BY post_count DESC
             ");

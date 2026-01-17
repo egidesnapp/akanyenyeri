@@ -479,6 +479,114 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             opacity: 1;
         }
 
+        /* Advertisement Styles */
+        .hero-advertisements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-ad-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 1;
+        }
+
+        /* Ensure advertisements fit properly across all screen sizes */
+        @media (max-width: 1200px) {
+            .hero-ad-slide {
+                background-size: cover;
+                background-position: center center;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero-ad-slide {
+                background-size: cover;
+                background-position: center center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-ad-slide {
+                background-size: cover;
+                background-position: center center;
+                /* Ensure important content stays visible on mobile */
+                background-attachment: scroll;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-ad-slide {
+                background-size: cover;
+                background-position: center center;
+            }
+        }
+
+        .hero-ad-slide.active {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .hero-ad-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 3;
+        }
+
+        .hero-ad-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 4;
+            cursor: pointer;
+        }
+
+        .hero-ad-dots {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        .hero-ad-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hero-ad-dot:hover,
+        .hero-ad-dot.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(1.2);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
@@ -491,6 +599,15 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
 
             .section-title {
                 font-size: 2rem;
+            }
+
+            .hero-ad-dots {
+                bottom: 20px;
+            }
+
+            .hero-ad-dot {
+                width: 10px;
+                height: 10px;
             }
         }
     </style>

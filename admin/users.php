@@ -6,7 +6,7 @@
 
 session_start();
 require_once 'php/auth_check.php';
-require_once '../config/database.php';
+require_once '../database/config/database.php';
 
 // Require authentication and admin role
 requireAuth();
@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
         $email = trim($_POST['email'] ?? '');
         $full_name = trim($_POST['full_name'] ?? '');
         $password = $_POST['password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
         $role = $_POST['role'] ?? 'author';
         $status = $_POST['status'] ?? 'active';
 
@@ -41,6 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
 
         if (strlen($password) < 6) {
             throw new Exception('Password must be at least 6 characters long');
+        }
+
+        if ($password !== $confirm_password) {
+            throw new Exception('Passwords do not match');
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -353,6 +358,13 @@ function timeAgo($datetime) {
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-end;
         }
 
         .user-stats {
@@ -675,18 +687,23 @@ function timeAgo($datetime) {
                         <!-- Header -->
                         <div class="users-header">
                             <h2><i class="fas fa-users"></i> Users</h2>
-                            <div class="user-stats">
-                                <div class="user-stat <?php echo $role_filter === 'all' ? 'active' : ''; ?>">
-                                    <a href="?role=all">All (<?php echo $stats['all']; ?>)</a>
-                                </div>
-                                <div class="user-stat <?php echo $role_filter === 'admin' ? 'active' : ''; ?>">
-                                    <a href="?role=admin">Admins (<?php echo $stats['admin']; ?>)</a>
-                                </div>
-                                <div class="user-stat <?php echo $role_filter === 'editor' ? 'active' : ''; ?>">
-                                    <a href="?role=editor">Editors (<?php echo $stats['editor']; ?>)</a>
-                                </div>
-                                <div class="user-stat <?php echo $role_filter === 'author' ? 'active' : ''; ?>">
-                                    <a href="?role=author">Authors (<?php echo $stats['author']; ?>)</a>
+                            <div class="header-actions">
+                                <a href="users.php" class="btn btn-primary">
+                                    <i class="fas fa-user-plus"></i> Add New User
+                                </a>
+                                <div class="user-stats">
+                                    <div class="user-stat <?php echo $role_filter === 'all' ? 'active' : ''; ?>">
+                                        <a href="?role=all">All (<?php echo $stats['all']; ?>)</a>
+                                    </div>
+                                    <div class="user-stat <?php echo $role_filter === 'admin' ? 'active' : ''; ?>">
+                                        <a href="?role=admin">Admins (<?php echo $stats['admin']; ?>)</a>
+                                    </div>
+                                    <div class="user-stat <?php echo $role_filter === 'editor' ? 'active' : ''; ?>">
+                                        <a href="?role=editor">Editors (<?php echo $stats['editor']; ?>)</a>
+                                    </div>
+                                    <div class="user-stat <?php echo $role_filter === 'author' ? 'active' : ''; ?>">
+                                        <a href="?role=author">Authors (<?php echo $stats['author']; ?>)</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -766,6 +783,7 @@ function timeAgo($datetime) {
                                         <a href="?edit=<?php echo $user['id']; ?>" class="action-link">Edit</a>
 
                                         <?php if ($user['id'] != $_SESSION['admin_user_id']): ?>
+                                        <a href="#" onclick="resetUserPassword(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>')" class="action-link">Reset Password</a>
                                         <a href="?action=delete&id=<?php echo $user['id']; ?>" class="action-link delete"
                                            onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
                                         <?php endif; ?>
@@ -867,6 +885,14 @@ function timeAgo($datetime) {
                                     </div>
                                 </div>
 
+                                <?php if (!$edit_user): ?>
+                                <div class="form-group">
+                                    <label for="confirm_password">Confirm Password *</label>
+                                    <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                                           placeholder="Confirm password" required>
+                                </div>
+                                <?php endif; ?>
+
                                 <div class="form-group">
                                     <label for="role">Role *</label>
                                     <select id="role" name="role" class="form-control" required>
@@ -878,4 +904,121 @@ function timeAgo($datetime) {
 
                                 <div class="form-group">
                                     <label for="status">Status *</label>
-                                    <select id="status" name="status" class
+                                    <select id="status" name="status" class="form-control" required>
+                                        <option value="active" <?php echo ($edit_user['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>>Active</option>
+                                        <option value="inactive" <?php echo ($edit_user['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" name="<?php echo $edit_user ? 'update_user' : 'add_user'; ?>" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> <?php echo $edit_user ? 'Update User' : 'Add User'; ?>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div id="passwordResetModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 8px;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #1d2327;">Reset User Password</h3>
+                <span class="close" onclick="closePasswordResetModal()" style="cursor: pointer; font-size: 28px; font-weight: bold; color: #aaa;">&times;</span>
+            </div>
+
+            <div id="resetModalContent">
+                <p>Are you sure you want to reset the password for user "<strong id="resetUsername"></strong>"?</p>
+                <p style="color: #646970; font-size: 0.9rem;">This will generate a temporary password and email it to the user. They will be required to change it on their next login.</p>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="closePasswordResetModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="confirmPasswordReset()" class="btn btn-danger" id="confirmResetBtn">
+                        <span>Reset Password</span>
+                        <i class="fas fa-spinner fa-spin" style="display: none; margin-left: 0.5rem;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResetUserId = null;
+
+        function resetUserPassword(userId, username) {
+            currentResetUserId = userId;
+            document.getElementById('resetUsername').textContent = username;
+            document.getElementById('passwordResetModal').style.display = 'block';
+        }
+
+        function closePasswordResetModal() {
+            document.getElementById('passwordResetModal').style.display = 'none';
+            currentResetUserId = null;
+        }
+
+        async function confirmPasswordReset() {
+            if (!currentResetUserId) return;
+
+            const confirmBtn = document.getElementById('confirmResetBtn');
+            const spinner = confirmBtn.querySelector('.fa-spinner');
+
+            confirmBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('php/admin_reset_password.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: currentResetUserId,
+                        csrf_token: '<?php echo getCSRFToken(); ?>'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Password reset successfully! A temporary password has been emailed to the user.');
+                    closePasswordResetModal();
+                    // Optionally reload the page to show updated info
+                    // location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                confirmBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('passwordIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('passwordResetModal');
+            if (event.target == modal) {
+                closePasswordResetModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -33,16 +33,16 @@
                 </div>
                 <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
                     <h5>Contact Info</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i>Kigali, Rwanda</p>
-                    <p><i class="fas fa-phone me-2"></i>+250 123 456 789</p>
-                    <p><i class="fas fa-envelope me-2"></i>info@akanyenyeri.rw</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>Kicukiro  Kigali, Rwanda</p>
+                    <p><i class="fas fa-phone me-2"></i>+250 782 375 378</p>
+                    <p><i class="fas fa-envelope me-2"></i>akanyenyeriblog@gmail.com</p>
                     <p><i class="fas fa-clock me-2"></i>Mon - Fri: 9AM - 6PM</p>
                 </div>
             </div>
             <hr class="my-4">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 Akanyenyeri Magazine. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2025 Akanyenyeri. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="privacy.php" class="me-3">Privacy Policy</a>
@@ -153,12 +153,10 @@
         if (themeToggle) {
             const themeIcon = themeToggle.querySelector('i');
 
-            // Load saved theme
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                html.setAttribute('data-theme', savedTheme);
-                updateThemeIcon(savedTheme);
-            }
+            // Load saved theme or default to dark
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            html.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
 
             // Theme toggle event
             themeToggle.addEventListener('click', () => {
@@ -184,6 +182,58 @@
         } else {
             console.warn('Theme toggle button not found');
         }
+
+        // Advertisement Rotation Functionality
+        let currentAdIndex = 0;
+        let adInterval;
+
+        function initAdvertisements() {
+            const adSlides = document.querySelectorAll('.hero-ad-slide');
+            const adDots = document.querySelectorAll('.hero-ad-dot');
+
+            if (adSlides.length === 0) return;
+
+            // Show first slide
+            showAdSlide(0);
+
+            // Auto-rotate every 5 seconds
+            adInterval = setInterval(() => {
+                currentAdIndex = (currentAdIndex + 1) % adSlides.length;
+                showAdSlide(currentAdIndex);
+            }, 5000);
+
+            // Dot click handlers
+            adDots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    clearInterval(adInterval);
+                    showAdSlide(index);
+                    currentAdIndex = index;
+                    // Restart auto-rotation
+                    adInterval = setInterval(() => {
+                        currentAdIndex = (currentAdIndex + 1) % adSlides.length;
+                        showAdSlide(currentAdIndex);
+                    }, 5000);
+                });
+            });
+        }
+
+        function showAdSlide(index) {
+            const adSlides = document.querySelectorAll('.hero-ad-slide');
+            const adDots = document.querySelectorAll('.hero-ad-dot');
+
+            // Hide all slides
+            adSlides.forEach(slide => slide.classList.remove('active'));
+            adDots.forEach(dot => dot.classList.remove('active'));
+
+            // Show selected slide
+            adSlides[index].classList.add('active');
+            if (adDots[index]) {
+                adDots[index].classList.add('active');
+            }
+        }
+
+        // Initialize advertisements when page loads
+        document.addEventListener('DOMContentLoaded', initAdvertisements);
     </script>
 </body>
 </html>

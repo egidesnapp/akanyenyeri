@@ -3,9 +3,14 @@ require_once __DIR__ . '/../database/config/database.php';
 
 // Get database connection
 $pdo = getDB();
+$dbConnectionError = $pdo === null;
 
 // Function to get featured posts
 function getFeaturedPosts($pdo, $limit = 6) {
+    if (!$pdo) {
+        return [];
+    }
+
     try {
         $stmt = $pdo->prepare("
             SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug
@@ -25,6 +30,10 @@ function getFeaturedPosts($pdo, $limit = 6) {
 
 // Function to get categories with post counts
 function getCategoriesWithCounts($pdo) {
+    if (!$pdo) {
+        return [];
+    }
+
     try {
         $stmt = $pdo->prepare("
             SELECT c.*, COUNT(p.id) as post_count
@@ -55,6 +64,28 @@ function estimateReadTime($content, $wordsPerMinute = 200) {
 // Get featured posts and categories
 $featured_posts = getFeaturedPosts($pdo, 6);
 $categories = getCategoriesWithCounts($pdo);
+
+// Get active advertisements for hero section
+function getActiveAdvertisements($pdo) {
+    if (!$pdo) {
+        return [];
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT * FROM advertisements
+            WHERE is_active = 1
+            AND (start_date IS NULL OR start_date <= NOW())
+            AND (end_date IS NULL OR end_date >= NOW())
+            ORDER BY display_order ASC, created_at DESC
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        return [];
+    }
+}
+$advertisements = getActiveAdvertisements($pdo);
 ?>
 
 <?php include 'includes/head.php'; ?>
@@ -63,6 +94,32 @@ $categories = getCategoriesWithCounts($pdo);
 
     <!-- Hero Section -->
     <section class="hero-section" id="home">
+        <!-- Advertisement Background Images -->
+        <div class="hero-advertisements" id="heroAdvertisements">
+            <?php if (!empty($advertisements)): ?>
+                <?php foreach ($advertisements as $index => $ad): ?>
+                <div class="hero-ad-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: url('<?php echo htmlspecialchars($ad['image_path']); ?>');">
+                    <?php if (!empty($ad['link_url'])): ?>
+                    <a href="<?php echo htmlspecialchars($ad['link_url']); ?>" class="hero-ad-link" target="_blank" rel="noopener noreferrer"></a>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <!-- Default background if no advertisements -->
+                <div class="hero-ad-slide active" style="background: var(--hero-bg);"></div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Advertisement Navigation Dots -->
+        <?php if (!empty($advertisements) && count($advertisements) > 1): ?>
+        <div class="hero-ad-dots">
+            <?php foreach ($advertisements as $index => $ad): ?>
+            <button class="hero-ad-dot <?php echo $index === 0 ? 'active' : ''; ?>" data-slide="<?php echo $index; ?>"></button>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- Hero Content -->
         <div class="container">
             <div class="hero-content text-center">
                 <h1 class="hero-title fade-in" data-aos="fade-up">Urakazaneza ku AKANYENYERI</h1>

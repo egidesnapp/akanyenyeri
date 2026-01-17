@@ -79,6 +79,12 @@ $page_title = $page_titles[$current_page] ?? 'Admin Panel';
     </div>
 
     <div class="header-right">
+        <!-- Logout Button -->
+        <a href="php/logout.php" class="header-logout-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+
         <!-- Notifications -->
         <div class="notifications-dropdown">
             <button class="notifications-toggle" id="notificationsToggle">
@@ -351,6 +357,37 @@ $page_title = $page_titles[$current_page] ?? 'Admin Panel';
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.header-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #dc3545;
+    color: white !important;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.header-logout-btn:hover {
+    background: #c82333;
+    color: white !important;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.header-logout-btn i {
+    font-size: 1rem;
+}
+
+.header-logout-btn span {
+    font-weight: 600;
 }
 
 .quick-actions {
