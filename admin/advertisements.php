@@ -93,13 +93,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         INSERT INTO advertisements (title, image_path, link_url, category, display_order, is_active, start_date, end_date, created_by)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
-                    $stmt->execute([$title, $image_path, $link_url, $category, $display_order, $is_active, $start_date, $end_date, $_SESSION['user_id']]);
+                    $created_by = $_SESSION['admin_user_id'] ?? 1; // Default to admin user ID 1
+                    $stmt->execute([$title, $image_path, $link_url, $category, $display_order, $is_active, $start_date, $end_date, $created_by]);
 
                     $message = 'Advertisement added successfully!';
                     $messageType = 'success';
                 } catch (Exception $e) {
                     $message = 'Error adding advertisement: ' . $e->getMessage();
                     $messageType = 'error';
+                    error_log('Advertisement add error: ' . $e->getMessage());
                 }
             }
         } elseif ($action === 'edit') {

@@ -13,7 +13,7 @@ function getFeaturedPosts($pdo, $limit = 6) {
 
     try {
         $stmt = $pdo->prepare("
-            SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug
+            SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color
             FROM posts p
             LEFT JOIN users u ON p.author_id = u.id
             LEFT JOIN categories c ON p.category_id = c.id
@@ -151,12 +151,12 @@ $advertisements = getActiveAdvertisements($pdo);
             <!-- Special Layout for First Three Cards -->
             <div class="row mb-5">
 
-                <!-- First Card - Large (Half Page) -->
+                <!-- First Article - Large (Half Page) -->
                 <div class="col-lg-6 mb-4" data-aos="fade-up">
                     <?php $post = $featured_posts[0]; ?>
-                    <div class="card h-100 featured-card-large no-hover">
-                        <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/800x400/3498db/ffffff?text=No+Image'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>" style="height: 350px; object-fit: cover;">
-                        <div class="card-body d-flex flex-column">
+                    <div class="article-large">
+                        <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/800x400/3498db/ffffff?text=No+Image'); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>" style="width: 100%; height: 350px; object-fit: cover; border-radius: 15px; margin-bottom: 1rem;">
+                        <div class="article-content">
                             <div class="mb-2">
                                 <span class="badge bg-primary"><?php echo htmlspecialchars($post['category_name']); ?></span>
                                 <small class="text-muted ms-2">
@@ -164,9 +164,9 @@ $advertisements = getActiveAdvertisements($pdo);
                                     <i class="fas fa-clock me-1"></i><?php echo estimateReadTime($post['content']); ?>
                                 </small>
                             </div>
-                            <h4 class="card-title"><?php echo htmlspecialchars($post['title']); ?></h4>
-                            <p class="card-text"><?php echo htmlspecialchars($post['excerpt']); ?></p>
-                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom mt-auto align-self-start">
+                            <h4 class="article-title animated-heading" style="color: <?php echo htmlspecialchars($post['category_color'] ?: '#2563eb'); ?>;"><?php echo htmlspecialchars($post['title']); ?></h4>
+                            <p class="article-excerpt"><?php echo htmlspecialchars($post['excerpt']); ?></p>
+                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom">
                                 <i class="fas fa-arrow-right me-2"></i>Read More
                             </a>
                         </div>
@@ -175,22 +175,22 @@ $advertisements = getActiveAdvertisements($pdo);
 
                 <!-- Second and Third Cards - Stacked on Right Side -->
                 <div class="col-lg-6 d-flex flex-column" style="gap: 1rem;">
-                    <!-- Second Card -->
+                    <!-- Second Article -->
                     <div class="flex-fill" style="flex: 1 1 45%;" data-aos="fade-up" data-aos-delay="200">
                         <?php $post = $featured_posts[1]; ?>
-                        <div class="card h-100 no-hover">
+                        <div class="article-horizontal">
                             <div class="row g-0 h-100">
                                 <div class="col-md-5 p-0">
-                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x300/27ae60/ffffff?text=No+Image'); ?>" class="w-100 h-100" alt="<?php echo htmlspecialchars($post['title']); ?>" style="object-fit: cover; border-radius: 20px 0 0 20px;">
+                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x300/27ae60/ffffff?text=No+Image'); ?>" class="w-100 h-100" alt="<?php echo htmlspecialchars($post['title']); ?>" style="object-fit: cover; border-radius: 15px 0 0 15px;">
                                 </div>
                                 <div class="col-md-7 d-flex">
-                                    <div class="card-body d-flex flex-column p-3 w-100">
+                                    <div class="article-body p-3 w-100">
                                         <div class="mb-2">
                                             <span class="badge bg-success"><?php echo htmlspecialchars($post['category_name']); ?></span>
                                         </div>
-                    <h6 class="card-title mb-2" style="font-size: 0.95rem; line-height: 1.3;"><?php echo htmlspecialchars($post['title']); ?></h6>
-                    <p class="card-text small mb-2" style="font-size: 0.8rem; line-height: 1.4;"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 60)) . (strlen($post['excerpt']) > 60 ? '...' : ''); ?></p>
-                    <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom btn-sm mt-auto align-self-start" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
+                    <h6 class="article-title animated-heading mb-2" style="font-size: 0.95rem; line-height: 1.3; color: <?php echo htmlspecialchars($post['category_color'] ?: '#2563eb'); ?>;"><?php echo htmlspecialchars($post['title']); ?></h6>
+                    <p class="article-excerpt small mb-2" style="font-size: 0.8rem; line-height: 1.4;"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 60)) . (strlen($post['excerpt']) > 60 ? '...' : ''); ?></p>
+                    <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom btn-sm" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
                         <i class="fas fa-arrow-right me-1"></i>Read More
                     </a>
                     <small class="text-muted" style="font-size: 0.7rem; margin-top: 0.5rem;">
@@ -202,22 +202,22 @@ $advertisements = getActiveAdvertisements($pdo);
                         </div>
                     </div>
 
-                    <!-- Third Card -->
+                    <!-- Third Article -->
                     <div class="flex-fill" style="flex: 1 1 45%;" data-aos="fade-up" data-aos-delay="400">
                         <?php $post = $featured_posts[2]; ?>
-                        <div class="card h-100 no-hover">
+                        <div class="article-horizontal">
                             <div class="row g-0 h-100">
                                 <div class="col-md-5 p-0">
-                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x300/17a2b8/ffffff?text=No+Image'); ?>" class="w-100 h-100" alt="<?php echo htmlspecialchars($post['title']); ?>" style="object-fit: cover; border-radius: 20px 0 0 20px;">
+                                    <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x300/17a2b8/ffffff?text=No+Image'); ?>" class="w-100 h-100" alt="<?php echo htmlspecialchars($post['title']); ?>" style="object-fit: cover; border-radius: 15px 0 0 15px;">
                                 </div>
                                 <div class="col-md-7 d-flex">
-                                    <div class="card-body d-flex flex-column p-3 w-100">
+                                    <div class="article-body p-3 w-100">
                                         <div class="mb-2">
                                             <span class="badge bg-info"><?php echo htmlspecialchars($post['category_name']); ?></span>
                                         </div>
-                                        <h6 class="card-title mb-2" style="font-size: 0.95rem; line-height: 1.3;"><?php echo htmlspecialchars($post['title']); ?></h6>
-                                        <p class="card-text small mb-2" style="font-size: 0.8rem; line-height: 1.4;"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 60)) . (strlen($post['excerpt']) > 60 ? '...' : ''); ?></p>
-                                        <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom btn-sm mt-auto align-self-start" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
+                                        <h6 class="article-title animated-heading mb-2" style="font-size: 0.95rem; line-height: 1.3; color: <?php echo htmlspecialchars($post['category_color'] ?: '#2563eb'); ?>;"><?php echo htmlspecialchars($post['title']); ?></h6>
+                                        <p class="article-excerpt small mb-2" style="font-size: 0.8rem; line-height: 1.4;"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 60)) . (strlen($post['excerpt']) > 60 ? '...' : ''); ?></p>
+                                        <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom btn-sm" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
                                             <i class="fas fa-arrow-right me-1"></i>Read More
                                         </a>
                                         <small class="text-muted" style="font-size: 0.7rem; margin-top: 0.5rem;">
@@ -231,13 +231,13 @@ $advertisements = getActiveAdvertisements($pdo);
                 </div>
             </div>
 
-            <!-- Remaining Cards - Standard Grid -->
+            <!-- Remaining Articles - Standard Grid -->
             <div class="row">
                 <?php for($i = 3; $i < count($featured_posts); $i++): $post = $featured_posts[$i]; ?>
                 <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="<?php echo ($i - 2) * 100; ?>">
-                    <div class="card h-100">
-                        <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x250/e74c3c/ffffff?text=No+Image'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>">
-                        <div class="card-body d-flex flex-column">
+                    <div class="article-grid">
+                        <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/400x250/e74c3c/ffffff?text=No+Image'); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 1rem;">
+                        <div class="article-content">
                             <div class="mb-2">
                                 <span class="badge bg-primary"><?php echo htmlspecialchars($post['category_name']); ?></span>
                                 <small class="text-muted ms-2">
@@ -245,9 +245,9 @@ $advertisements = getActiveAdvertisements($pdo);
                                     <i class="fas fa-clock me-1"></i><?php echo estimateReadTime($post['content']); ?>
                                 </small>
                             </div>
-                            <h5 class="card-title"><?php echo htmlspecialchars($post['title']); ?></h5>
-                            <p class="card-text"><?php echo htmlspecialchars($post['excerpt']); ?></p>
-                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom mt-auto align-self-start">
+                            <h5 class="article-title animated-heading" style="color: <?php echo htmlspecialchars($post['category_color'] ?: '#2563eb'); ?>;"><?php echo htmlspecialchars($post['title']); ?></h5>
+                            <p class="article-excerpt"><?php echo htmlspecialchars($post['excerpt']); ?></p>
+                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>" class="btn btn-custom">
                                 <i class="fas fa-arrow-right me-2"></i>Read More
                             </a>
                         </div>
@@ -289,13 +289,13 @@ $advertisements = getActiveAdvertisements($pdo);
                     $color = $categoryColors[$category['name']] ?? 'primary';
             ?>
             <div class="col-lg-4 col-md-6 mb-4" data-aos="zoom-in" data-aos-delay="<?php echo $index * 100; ?>">
-                <div class="card text-center h-100">
-                    <div class="card-body">
+                <div class="category-item text-center">
+                    <div class="category-content">
                         <div class="mb-3">
                             <i class="<?php echo $icon; ?> fa-3x text-<?php echo $color; ?>"></i>
                         </div>
-                        <h5 class="card-title"><?php echo htmlspecialchars($category['name']); ?></h5>
-                        <p class="text-muted"><?php echo $category['post_count']; ?> articles</p>
+                        <h5 class="category-title"><?php echo htmlspecialchars($category['name']); ?></h5>
+                        <p class="category-count"><?php echo $category['post_count']; ?> articles</p>
                         <a href="category.php?slug=<?php echo htmlspecialchars($category['slug']); ?>" class="btn btn-outline-<?php echo $color; ?>">
                             <i class="fas fa-arrow-right me-2"></i>Explore
                         </a>

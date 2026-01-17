@@ -16,19 +16,37 @@
                 <div class="col-lg-2 col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#news">Latest News</a></li>
-                        <li><a href="#categories">Categories</a></li>
-                        <li><a href="#about">About Us</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="index.php#news">Latest News</a></li>
+                        <li><a href="index.php#categories">Categories</a></li>
+                        <li><a href="about.php">About Us</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
                     <h5>Categories</h5>
                     <ul class="list-unstyled">
-                        <li><a href="#">Politics</a></li>
-                        <li><a href="#">Business</a></li>
-                        <li><a href="#">Technology</a></li>
-                        <li><a href="#">Sports</a></li>
+                        <?php
+                        // Get categories for footer links
+                        if (function_exists('getCategories')) {
+                            $footerCategories = getCategories($pdo ?? null);
+                            if (!empty($footerCategories)) {
+                                foreach (array_slice($footerCategories, 0, 4) as $cat) {
+                                    echo '<li><a href="category.php?slug=' . htmlspecialchars($cat['slug']) . '">' . htmlspecialchars($cat['name']) . '</a></li>';
+                                }
+                            } else {
+                                // Fallback static links if function not available
+                                echo '<li><a href="#">Politics</a></li>';
+                                echo '<li><a href="#">Business</a></li>';
+                                echo '<li><a href="#">Technology</a></li>';
+                                echo '<li><a href="#">Sports</a></li>';
+                            }
+                        } else {
+                            echo '<li><a href="#">Politics</a></li>';
+                            echo '<li><a href="#">Business</a></li>';
+                            echo '<li><a href="#">Technology</a></li>';
+                            echo '<li><a href="#">Sports</a></li>';
+                        }
+                        ?>
                     </ul>
                 </div>
                 <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">

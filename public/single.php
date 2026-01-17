@@ -13,7 +13,7 @@ $post = null;
 if ($slug) {
     try {
         $stmt = $pdo->prepare("
-            SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug
+            SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color
             FROM posts p
             LEFT JOIN users u ON p.author_id = u.id
             LEFT JOIN categories c ON p.category_id = c.id
@@ -84,7 +84,7 @@ function formatDate($date) { return date('F j, Y', strtotime($date)); }
                             <div class="mb-3">
                                 <span class="badge bg-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Sports</span>
                             </div>
-                            <h1 class="post-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #1f2937; line-height: 1.2; margin-bottom: 1rem;"><?php echo htmlspecialchars($post['title']); ?></h1>
+                            <h1 class="post-title animated-heading" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: <?php echo htmlspecialchars($post['category_color'] ?: '#2563eb'); ?>; line-height: 1.2; margin-bottom: 1rem;"><?php echo htmlspecialchars($post['title']); ?></h1>
                             <div class="post-meta" style="display: flex; align-items: center; gap: 1rem; color: #6b7280; font-size: 0.9rem;">
                                 <span><i class="fas fa-user me-1"></i><?php echo htmlspecialchars($post['author_name']); ?></span>
                                 <span><i class="fas fa-calendar me-1"></i><?php echo formatDate($post['created_at']); ?></span>

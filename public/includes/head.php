@@ -587,6 +587,67 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             transform: scale(1.2);
         }
 
+        /* Animated Headings */
+        .animated-heading {
+            position: relative;
+            overflow: hidden;
+            animation: headingGlow 3s ease-in-out infinite alternate;
+        }
+
+        .animated-heading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: headingShine 4s linear infinite;
+        }
+
+        .animated-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            animation: headingUnderline 3s ease-in-out infinite;
+        }
+
+        @keyframes headingGlow {
+            0% {
+                text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+                transform: scale(1);
+            }
+            100% {
+                text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes headingShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes headingUnderline {
+            0% { width: 0; }
+            50% { width: 100%; }
+            100% { width: 0; }
+        }
+
+        /* Enhanced heading animations for different heading levels */
+        .article-title.animated-heading {
+            transition: all 0.3s ease;
+        }
+
+        .article-title.animated-heading:hover {
+            animation-play-state: paused;
+            transform: translateY(-2px);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
@@ -608,6 +669,14 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             .hero-ad-dot {
                 width: 10px;
                 height: 10px;
+            }
+
+            .animated-heading {
+                animation-duration: 2s;
+            }
+
+            .animated-heading::before {
+                animation-duration: 3s;
             }
         }
     </style>
