@@ -2,7 +2,7 @@
 /**
  * API endpoint: returns paginated published posts as JSON
  */
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../database/config/database.php';
 // Try PHP gzip output for API responses
 if (!headers_sent()) {
     @ob_start('ob_gzhandler');
@@ -10,7 +10,7 @@ if (!headers_sent()) {
 
 // Simple inline cache helper to avoid path issues
 function api_cache_get($key, $ttl = 10) {
-    $dir = __DIR__ . '/../akanyenyeri/cache';
+    $dir = __DIR__ . '/../cache';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $file = $dir . '/' . preg_replace('/[^a-z0-9_\-]/i','_', $key) . '.json';
     if (!file_exists($file)) return false;
@@ -21,7 +21,7 @@ function api_cache_get($key, $ttl = 10) {
 }
 
 function api_cache_set($key, $data) {
-    $dir = __DIR__ . '/../simple_news/cache';
+    $dir = __DIR__ . '/../cache';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $file = $dir . '/' . preg_replace('/[^a-z0-9_\-]/i','_', $key) . '.json';
     @file_put_contents($file, json_encode(['ts' => time(), 'data' => $data]));
@@ -45,7 +45,7 @@ try {
                 LEFT JOIN users u ON p.author_id = u.id
                 LEFT JOIN categories c ON p.category_id = c.id
                 WHERE p.status = 'published'
-                ORDER BY p.created_at DESC
+                ORDER BY p.is_featured DESC, p.created_at DESC
                 LIMIT " . intval($limit) . " OFFSET " . intval($offset);
         $stmt = $pdo->prepare($sql);
         $stmt->execute();

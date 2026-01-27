@@ -1,71 +1,85 @@
 <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4" data-aos="fade-up">
-                    <h5><img src="../logo/akanyenyeri logo.png" alt="Akanyenyeri Logo" style="height: 25px; width: auto; margin-right: 8px;">Akanyenyeri Magazine</h5>
-                    <p>Your trusted source for comprehensive news coverage, in-depth analysis, and compelling storytelling from around the world.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
+            <!-- Compact Footer Content -->
+            <div class="footer-content">
+                <!-- Brand Section -->
+                <div class="footer-section">
+                    <div class="footer-brand">
+                        <img src="<?php echo SITE_URL; ?>logo/akanyenyeri_logo.png" alt="Akanyenyeri Logo" style="height: 25px; width: auto; margin-right: 8px;">
+                        <span>Akanyenyeri</span>
+                    </div>
+                    <p class="footer-text">Your trusted source for comprehensive news coverage.</p>
+                </div>
+
+                <!-- Quick Links Section -->
+                <div class="footer-section">
+                    <h6>Quick Links</h6>
+                    <div class="footer-links-horizontal">
+                        <a href="<?php echo SITE_URL; ?>public/index.php?v=footer">Home</a>
+                        <a href="<?php echo SITE_URL; ?>public/index.php#news">Latest News</a>
+                        <a href="<?php echo SITE_URL; ?>public/index.php#categories">Categories</a>
+                        <a href="<?php echo SITE_URL; ?>public/about.php">About Us</a>
+                        <a href="<?php echo SITE_URL; ?>public/services.php">Services</a>
+                        <a href="<?php echo SITE_URL; ?>public/contact.php">Contact</a>
                     </div>
                 </div>
-                <div class="col-lg-2 col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="index.php">Home</a></li>
-                        <li><a href="index.php#news">Latest News</a></li>
-                        <li><a href="index.php#categories">Categories</a></li>
-                        <li><a href="about.php">About Us</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2 col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
-                    <h5>Categories</h5>
-                    <ul class="list-unstyled">
+
+                <!-- Categories Section -->
+                <div class="footer-section">
+                    <h6>Categories</h6>
+                    <div class="footer-links-horizontal">
                         <?php
                         // Get categories for footer links
                         if (function_exists('getCategories')) {
                             $footerCategories = getCategories($pdo ?? null);
                             if (!empty($footerCategories)) {
-                                foreach (array_slice($footerCategories, 0, 4) as $cat) {
-                                    echo '<li><a href="category.php?slug=' . htmlspecialchars($cat['slug']) . '">' . htmlspecialchars($cat['name']) . '</a></li>';
+                                foreach (array_slice($footerCategories, 0, 6) as $cat) {
+                                    echo '<a href="' . SITE_URL . 'public/category.php?slug=' . htmlspecialchars($cat['slug']) . '">' . htmlspecialchars($cat['name']) . '</a>';
                                 }
                             } else {
                                 // Fallback static links if function not available
-                                echo '<li><a href="#">Politics</a></li>';
-                                echo '<li><a href="#">Business</a></li>';
-                                echo '<li><a href="#">Technology</a></li>';
-                                echo '<li><a href="#">Sports</a></li>';
+                                echo '<a href="' . SITE_URL . 'public/category.php?slug=politics">Politics</a>';
+                                echo '<a href="' . SITE_URL . 'public/category.php?slug=business">Business</a>';
+                                echo '<a href="' . SITE_URL . 'public/category.php?slug=technology">Technology</a>';
+                                echo '<a href="' . SITE_URL . 'public/category.php?slug=sports">Sports</a>';
+                                echo '<a href="' . SITE_URL . 'public/category.php?slug=entertainment">Entertainment</a>';
+                                echo '<a href="' . SITE_URL . 'public/category.php?slug=health">Health</a>';
                             }
                         } else {
-                            echo '<li><a href="#">Politics</a></li>';
-                            echo '<li><a href="#">Business</a></li>';
-                            echo '<li><a href="#">Technology</a></li>';
-                            echo '<li><a href="#">Sports</a></li>';
+                            echo '<a href="' . SITE_URL . 'public/category.php?slug=politics">Politics</a>';
+                            echo '<a href="' . SITE_URL . 'public/category.php?slug=business">Business</a>';
+                            echo '<a href="' . SITE_URL . 'public/category.php?slug=technology">Technology</a>';
+                            echo '<a href="' . SITE_URL . 'public/category.php?slug=sports">Sports</a>';
+                            echo '<a href="' . SITE_URL . 'public/category.php?slug=entertainment">Entertainment</a>';
+                            echo '<a href="' . SITE_URL . 'public/category.php?slug=health">Health</a>';
                         }
                         ?>
-                    </ul>
+                    </div>
                 </div>
-                <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
-                    <h5>Contact Info</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i>Kicukiro  Kigali, Rwanda</p>
-                    <p><i class="fas fa-phone me-2"></i>+250 782 375 378</p>
-                    <p><i class="fas fa-envelope me-2"></i>akanyenyeriblog@gmail.com</p>
-                    <p><i class="fas fa-clock me-2"></i>Mon - Fri: 9AM - 6PM</p>
+
+                <!-- Contact & Social Section -->
+                <div class="footer-section">
+                    <h6>Connect</h6>
+                    <div class="footer-contact-compact">
+                        <p><i class="fas fa-envelope me-2"></i>akanyenyeriblog@gmail.com</p>
+                    </div>
+                    <div class="social-links-compact">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
                 </div>
             </div>
-            <hr class="my-4">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 Akanyenyeri. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="privacy.php" class="me-3">Privacy Policy</a>
-                    <a href="terms.php" class="me-3">Terms of Service</a>
-                    <a href="cookies.php">Cookie Policy</a>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom-compact">
+                <p class="mb-0">&copy; 2025 Akanyenyeri. All rights reserved.</p>
+                <div class="footer-legal-compact">
+                    <a href="<?php echo SITE_URL; ?>public/privacy.php">Privacy</a>
+                    <a href="<?php echo SITE_URL; ?>public/terms.php">Terms</a>
+                    <a href="<?php echo SITE_URL; ?>public/cookies.php">Cookies</a>
                 </div>
             </div>
         </div>
@@ -84,13 +98,51 @@
             offset: 100
         });
 
-        // Loading animation
+        // Enhanced Star Loading Animation
         window.addEventListener('load', function() {
             const loadingOverlay = document.getElementById('loadingOverlay');
-            setTimeout(() => {
-                loadingOverlay.classList.add('hidden');
-            }, 1000);
+            if (loadingOverlay) {
+                // Add fade-out animation after page loads
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = '0';
+                    loadingOverlay.style.visibility = 'hidden';
+                    
+                    // Add a final star burst effect before hiding
+                    const starLoader = loadingOverlay.querySelector('.star-loader');
+                    if (starLoader) {
+                        starLoader.style.transform = 'scale(1.5)';
+                        starLoader.style.opacity = '0';
+                    }
+                    
+                    // Completely remove after animation
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 500);
+                }, 1500);
+            }
         });
+
+        // Function to show loading animation for AJAX requests
+        function showStarLoader() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+                loadingOverlay.style.opacity = '1';
+                loadingOverlay.style.visibility = 'visible';
+            }
+        }
+
+        // Function to hide loading animation
+        function hideStarLoader() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.visibility = 'hidden';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+            }
+        }
 
         // Newsletter form submission
         document.getElementById('newsletterForm').addEventListener('submit', function(e) {
@@ -135,13 +187,12 @@
         // Navbar background change on scroll
         window.addEventListener('scroll', function() {
             const navbar = document.querySelector('.navbar');
-            const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
 
             if (window.scrollY > 50) {
-                navbar.style.background = isDarkTheme ? 'rgba(30, 41, 59, 0.98)' : 'rgba(255, 255, 255, 0.98)';
+                navbar.style.background = 'rgba(30, 41, 59, 0.98)';
                 navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
             } else {
-                navbar.style.background = isDarkTheme ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+                navbar.style.background = 'rgba(30, 41, 59, 0.95)';
                 navbar.style.boxShadow = 'none';
             }
         });
@@ -163,43 +214,6 @@
                 this.style.transform = 'translateY(0) scale(1)';
             });
         });
-
-        // Theme Toggle Functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-
-        if (themeToggle) {
-            const themeIcon = themeToggle.querySelector('i');
-
-            // Load saved theme or default to dark
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            html.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-
-            // Theme toggle event
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateThemeIcon(newTheme);
-            });
-
-            function updateThemeIcon(theme) {
-                if (themeIcon) {
-                    if (theme === 'dark') {
-                        themeIcon.className = 'fas fa-sun';
-                        themeToggle.title = 'Switch to Light Theme';
-                    } else {
-                        themeIcon.className = 'fas fa-moon';
-                        themeToggle.title = 'Switch to Dark Theme';
-                    }
-                }
-            }
-        } else {
-            console.warn('Theme toggle button not found');
-        }
 
         // Advertisement Rotation Functionality
         let currentAdIndex = 0;
@@ -252,6 +266,54 @@
 
         // Initialize advertisements when page loads
         document.addEventListener('DOMContentLoaded', initAdvertisements);
+
+        // Enhanced Hero Section Interactions
+        function initHeroInteractions() {
+            const heroSection = document.querySelector('.hero-section');
+            const heroContent = document.querySelector('.hero-content');
+            
+            if (!heroSection || !heroContent) return;
+
+            // Parallax effect for hero section
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                
+                if (heroSection) {
+                    heroSection.style.transform = `translateY(${rate}px)`;
+                }
+            });
+
+            // Enhanced button hover effects
+            const heroButton = document.querySelector('.hero-section .btn-custom');
+            if (heroButton) {
+                heroButton.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                    this.style.boxShadow = '0 15px 35px rgba(37, 99, 235, 0.5)';
+                });
+
+                heroButton.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                    this.style.boxShadow = '0 10px 25px rgba(37, 99, 235, 0.35)';
+                });
+            }
+
+            // Add entrance animations
+            const heroElements = document.querySelectorAll('.hero-content > *');
+            heroElements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.8s ease-out';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
+
+        // Initialize hero interactions after DOM is loaded
+        document.addEventListener('DOMContentLoaded', initHeroInteractions);
     </script>
 </body>
 </html>

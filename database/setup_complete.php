@@ -180,6 +180,7 @@ try {
             image_path VARCHAR(500) NOT NULL,
             link_url VARCHAR(500),
             category VARCHAR(100),
+            type ENUM('background', 'content') DEFAULT 'background',
             display_order INT DEFAULT 0,
             is_active BOOLEAN DEFAULT TRUE,
             start_date TIMESTAMP NULL,
@@ -200,9 +201,9 @@ try {
     // Insert admin user
     $pdo->exec("
         INSERT INTO users (username, email, password, full_name, role) VALUES
-        ('egide', 'egide@akanyenyeri.com', '" . password_hash("egide123", PASSWORD_DEFAULT) . "', 'Egide Administrator', 'admin')
+        ('Akanyenyeri', 'admin@akanyenyeri.com', '" . password_hash("99%Complex", PASSWORD_DEFAULT) . "', 'Akanyenyeri Administrator', 'admin')
     ");
-    echo "✓ Created admin user (egide/egide123)\n";
+    echo "✓ Created admin user (Akanyenyeri/99%Complex)\n";
 
     // Insert categories
     $pdo->exec("
@@ -349,7 +350,7 @@ try {
     echo "\n🎉 Database setup completed successfully!\n";
     echo "\n📊 Summary:\n";
     echo "- All tables created\n";
-    echo "- Sample admin user: egide/egide123\n";
+    echo "- Sample admin user: Akanyenyeri/99%Complex\n";
     echo "- 6 categories created\n";
     echo "- 5 sample posts created\n";
     echo "- Upload directories created\n";
@@ -357,7 +358,7 @@ try {
 
     echo "\n🔗 Next steps:\n";
     echo "1. Visit: http://localhost/akanyenyeri/admin/login.php\n";
-    echo "2. Login with: egide / egide123\n";
+    echo "2. Login with: Akanyenyeri / 99%Complex\n";
     echo "3. Check the website: http://localhost/akanyenyeri/public/index.php\n";
     echo "4. Upload media: http://localhost/akanyenyeri/admin/media.php\n";
 

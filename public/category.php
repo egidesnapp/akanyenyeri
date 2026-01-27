@@ -1,98 +1,147 @@
 <?php
 /**
- * Category Archive Template for Akanyenyeri Magazine
+ * Category Page Display
+ * Handles displaying posts by category
  */
 
-require_once __DIR__ . '/../database/config/database.php';
+require_once '../database/config/database.php';
 
-$pdo = getDB();
+// Get the category slug from URL parameter
+$category_slug = $_GET['slug'] ?? '';
 
-$slug = isset($_GET['slug']) ? $_GET['slug'] : '';
-
-$category = null;
-if ($slug) {
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM categories WHERE slug = ?");
-        $stmt->execute([$slug]);
-        $category = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {}
-}
-
-if (!$category) {
-    header("Location: index.php");
+// If no slug provided, redirect to homepage
+if (empty($category_slug)) {
+    header("Location: /");
     exit;
 }
 
-function getCategoryPosts($pdo, $categoryId) {
-    try {
-        $stmt = $pdo->prepare("
-            SELECT p.*, u.full_name as author_name, c.name as category_name
-            FROM posts p
-            LEFT JOIN users u ON p.author_id = u.id
-            LEFT JOIN categories c ON p.category_id = c.id
-            WHERE p.category_id = ? AND p.status = 'published'
-            ORDER BY p.created_at DESC
-        ");
-        $stmt->execute([$categoryId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) { return []; }
+// Get database connection
+try {
+    $pdo = getDB();
+
+    // Fetch the category information
+    $stmt = $pdo->prepare("SELECT * FROM categories WHERE slug = ?");
+    $stmt->execute([$category_slug]);
+    $category = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$category) {
+        // Category not found - show 404
+        header("HTTP/1.0 404 Not Found");
+        include '../404.php';
+        exit;
+    }
+
+    // Fetch posts in this category
+    $stmt = $pdo->prepare("
+        SELECT p.*, u.full_name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color
+        FROM posts p
+        LEFT JOIN users u ON p.author_id = u.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.category_id = ? AND p.status = 'published'
+        ORDER BY p.created_at DESC
+    ");
+    $stmt->execute([$category['id']]);
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    // Database error
+    header("HTTP/1.0 500 Internal Server Error");
+    echo "Database error: " . htmlspecialchars($e->getMessage());
+    exit;
 }
 
-$posts = getCategoryPosts($pdo, $category['id']);
-
-function getCategories($pdo) {
-    try {
-        $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) { return []; }
-}
-
-$categories = getCategories($pdo);
-
-function formatDate($date) { return date('F j, Y', strtotime($date)); }
+// Include header
+include 'includes/head.php';
+include 'includes/nav.php';
 ?>
 
-<?php include_once __DIR__ . '/header.php'; ?>
-
-<div class="site-content">
-    <div class="container-inner">
-        <main id="primary" class="site-main">
-            <header class="archive-header">
-                <h1 class="archive-title"><?php echo htmlspecialchars($category['name']); ?></h1>
-                <?php if (!empty($category['description'])): ?>
-                <div class="archive-description"><?php echo htmlspecialchars($category['description']); ?></div>
-                <?php endif; ?>
+<main class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Category Header -->
+            <header class="mb-4">
+                <h1 class="display-4">
+                    Category: <?php echo htmlspecialchars($category['name']); ?>
+                </h1>
+                <p class="lead"><?php echo htmlspecialchars($category['description'] ?? ''); ?></p>
             </header>
 
-            <div class="post-list">
-                <?php if (count($posts) > 0): ?>
+            <!-- Posts List -->
+            <?php if (count($posts) > 0): ?>
+                <div class="row">
                     <?php foreach ($posts as $post): ?>
-                    <article class="post-item">
-                        <div class="post-item-thumbnail">
-                            <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>">
-                                <img src="<?php echo htmlspecialchars($post['featured_image'] ?: 'https://via.placeholder.com/300x200'); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
-                            </a>
-                        </div>
-                        <div class="post-item-content">
-                            <h2 class="post-item-title">
-                                <a href="single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>"><?php echo htmlspecialchars($post['title']); ?></a>
-                            </h2>
-                            <div class="post-item-meta">
-                                <span><i class="fa fa-user"></i> <?php echo htmlspecialchars($post['author_name']); ?></span>
-                                <span style="margin-left: 10px;"><i class="fa fa-calendar"></i> <?php echo formatDate($post['created_at']); ?></span>
-                            </div>
-                            <div class="post-item-excerpt">
-                                <?php echo htmlspecialchars(substr(strip_tags($post['content']), 0, 150)) . '...'; ?>
-                            </div>
-                        </div>
-                    </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No posts found in this category.</p>
-                <?php endif; ?>
-            </div>
-        </main>
-    </div>
-</div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <?php if (!empty($post['featured_image'])): ?>
+                                    <img src="/akanyenyeri/uploads/images/<?php echo htmlspecialchars($post['featured_image']); ?>"
+                                         alt="<?php echo htmlspecialchars($post['title']); ?>"
+                                         class="card-img-top">
+                                <?php endif; ?>
 
-<?php include_once __DIR__ . '/footer.php'; ?>
+                                <div class="card-body">
+                                    <h5 class="card-title"><?php echo htmlspecialchars($post['title']); ?></h5>
+                                    <p class="card-text">
+                                        <?php echo mb_substr(strip_tags($post['content']), 0, 150) . '...'; ?>
+                                    </p>
+                                </div>
+
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge" style="background-color: <?php echo htmlspecialchars($post['category_color'] ?? '#6c757d'); ?>;">
+                                            <?php echo htmlspecialchars($post['category_name'] ?? 'Uncategorized'); ?>
+                                        </span>
+                                        <a href="<?php echo SITE_URL; ?>public/single.php?slug=<?php echo htmlspecialchars($post['slug']); ?>"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Read More
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-info">
+                    No posts found in this category.
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Sidebar content -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">About This Category</h5>
+                    <p class="card-text">
+                        <?php echo htmlspecialchars($category['description'] ?? 'No description available.'); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">All Categories</h5>
+                    <ul class="list-unstyled">
+                        <?php
+                        // Fetch all categories
+                        $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
+                        $all_categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($all_categories as $cat): ?>
+                            <li class="mb-2">
+                                <a href="/akanyenyeri/category/<?php echo htmlspecialchars($cat['slug']); ?>"
+                                   style="color: <?php echo htmlspecialchars($cat['color'] ?? '#6c757d'); ?>;">
+                                    <?php echo htmlspecialchars($cat['name']); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<?php
+// Include footer
+include 'includes/footer.php';
+?>

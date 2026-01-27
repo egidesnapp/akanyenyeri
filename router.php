@@ -1,7 +1,8 @@
 <?php
 /**
- * Main Router for Akanyenyeri Magazine
- * Handles all URL routing without requiring .htaccess
+ * Simple Router for Akanyenyeri Magazine
+ * This router works without requiring .htaccess/mod_rewrite
+ * Place this in your main directory and set it as the default document
  */
 
 // Get the request path
@@ -10,9 +11,7 @@ $request_path = parse_url($request_uri, PHP_URL_PATH);
 
 // Remove the base path (assuming site is in /akanyenyeri/)
 $base_path = '/akanyenyeri';
-if (strpos($request_path, $base_path) === 0) {
-    $request_path = substr($request_path, strlen($base_path));
-}
+$request_path = str_replace($base_path, '', $request_path);
 $request_path = trim($request_path, '/');
 
 // Split path into parts

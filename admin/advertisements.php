@@ -57,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = trim($_POST['title'] ?? '');
             $link_url = trim($_POST['link_url'] ?? '');
             $category = trim($_POST['category'] ?? '');
+            $type = trim($_POST['type'] ?? 'background');
             $display_order = (int)($_POST['display_order'] ?? 0);
             $is_active = isset($_POST['is_active']) ? 1 : 0;
             $start_date = !empty($_POST['start_date']) ? $_POST['start_date'] : null;
@@ -90,11 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 try {
                     $stmt = $pdo->prepare("
-                        INSERT INTO advertisements (title, image_path, link_url, category, display_order, is_active, start_date, end_date, created_by)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO advertisements (title, image_path, link_url, category, type, display_order, is_active, start_date, end_date, created_by)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
                     $created_by = $_SESSION['admin_user_id'] ?? 1; // Default to admin user ID 1
-                    $stmt->execute([$title, $image_path, $link_url, $category, $display_order, $is_active, $start_date, $end_date, $created_by]);
+                    $stmt->execute([$title, $image_path, $link_url, $category, $type, $display_order, $is_active, $start_date, $end_date, $created_by]);
 
                     $message = 'Advertisement added successfully!';
                     $messageType = 'success';
@@ -110,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = trim($_POST['title'] ?? '');
             $link_url = trim($_POST['link_url'] ?? '');
             $category = trim($_POST['category'] ?? '');
+            $type = trim($_POST['type'] ?? 'background');
             $display_order = (int)($_POST['display_order'] ?? 0);
             $is_active = isset($_POST['is_active']) ? 1 : 0;
             $start_date = !empty($_POST['start_date']) ? $_POST['start_date'] : null;
@@ -139,12 +141,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 try {
                     $stmt = $pdo->prepare("
                         UPDATE advertisements SET
-                        title = ?, image_path = ?, link_url = ?, category = ?,
+                        title = ?, image_path = ?, link_url = ?, category = ?, type = ?,
                         display_order = ?, is_active = ?, start_date = ?, end_date = ?,
                         updated_at = CURRENT_TIMESTAMP
                         WHERE id = ?
                     ");
-                    $stmt->execute([$title, $image_path, $link_url, $category, $display_order, $is_active, $start_date, $end_date, $id]);
+                    $stmt->execute([$title, $image_path, $link_url, $category, $type, $display_order, $is_active, $start_date, $end_date, $id]);
 
                     $message = 'Advertisement updated successfully!';
                     $messageType = 'success';
@@ -385,6 +387,10 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
 										<option value="Entertainment">Entertainment</option>
 										<option value="Health">Health</option>
 									</select>
+									<select class="meta-input" name="type">
+										<option value="background">Background (Hero)</option>
+										<option value="content">Content Image</option>
+									</select>
 									<input class="meta-input" type="number" name="display_order" placeholder="Display order" value="0">
 								</div>
 								<div>
@@ -486,9 +492,17 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
 						</div>
 
 						<div class="form-group">
-							<label class="form-label">Display Order</label>
-							<input class="form-input" type="number" name="display_order" id="editOrder" value="0">
+							<label class="form-label">Type</label>
+							<select class="form-input" name="type" id="editType">
+								<option value="background">Background (Hero)</option>
+								<option value="content">Content Image</option>
+							</select>
 						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Display Order</label>
+						<input class="form-input" type="number" name="display_order" id="editOrder" value="0">
 					</div>
 
 					<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -577,6 +591,7 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
 				document.getElementById('editTitle').value = '<?php echo htmlspecialchars($ad['title']); ?>';
 				document.getElementById('editLink').value = '<?php echo htmlspecialchars($ad['link_url'] ?? ''); ?>';
 				document.getElementById('editCategory').value = '<?php echo htmlspecialchars($ad['category'] ?? ''); ?>';
+				document.getElementById('editType').value = '<?php echo htmlspecialchars($ad['type'] ?? 'background'); ?>';
 				document.getElementById('editOrder').value = '<?php echo $ad['display_order']; ?>';
 				document.getElementById('editActive').checked = <?php echo $ad['is_active'] ? 'true' : 'false'; ?>;
 				document.getElementById('existingImage').value = '<?php echo htmlspecialchars($ad['image_path']); ?>';

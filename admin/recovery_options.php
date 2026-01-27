@@ -28,7 +28,7 @@
             justify-content: center;
             color: #e2e8f0;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
             padding: 20px;
         }
 

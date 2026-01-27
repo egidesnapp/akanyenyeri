@@ -12,6 +12,21 @@ require_once __DIR__ . "/rate_limiter.php";
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
+// Test database connection
+try {
+    $db = getDB();
+    if (!$db) {
+        throw new Exception("Database connection failed");
+    }
+} catch (Exception $e) {
+    header("Content-Type: application/json");
+    echo json_encode([
+        "success" => false,
+        "message" => "Database connection error. Please contact administrator.",
+    ]);
+    exit();
+}
+
 class AdminAuth
 {
     private $pdo;

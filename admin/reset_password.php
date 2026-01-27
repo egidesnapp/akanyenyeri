@@ -22,13 +22,14 @@
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #e2e8f0;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
+            padding: 20px;
         }
 
         body::before {

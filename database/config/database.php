@@ -5,7 +5,7 @@
  */
 
 // Database configuration
-define("DB_HOST", "localhost");
+define("DB_HOST", "127.0.0.1");
 define("DB_NAME", "akanyenyeri_db");
 define("DB_USER", "root");
 define("DB_PASS", "");
@@ -35,20 +35,23 @@ class Database
     {
         $this->conn = null;
         try {
-            $dsn =
-                "mysql:host=" .
-                $this->host .
-                ";dbname=" .
-                $this->db_name .
-                ";charset=" .
-                $this->charset;
+            // Try socket connection first, fallback to TCP
+            $socketPath = "C:/xampp/mysql/mysql.sock";
+            if (file_exists($socketPath)) {
+                $dsn = "mysql:unix_socket=" . $socketPath . ";dbname=" . $this->db_name . ";charset=" . $this->charset;
+            } else {
+                // Fallback to TCP connection - use the host property
+                $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=" . $this->charset;
+            }
             $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->setAttribute(
                 PDO::ATTR_ERRMODE,
                 PDO::ERRMODE_EXCEPTION,
             );
         } catch (PDOException $exception) {
-            echo "Connection error: " . $exception->getMessage();
+            // Don't echo errors here - let the calling code handle them
+            error_log("Database connection error: " . $exception->getMessage());
+            return null;
         }
         return $this->conn;
     }
@@ -65,11 +68,14 @@ function getDB()
 function initializeDatabase()
 {
     try {
-        $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";charset=" . DB_CHARSET,
-            DB_USER,
-            DB_PASS,
-        );
+        // Try socket connection first, fallback to TCP
+        $socketPath = "C:/xampp/mysql/mysql.sock";
+        if (file_exists($socketPath)) {
+            $dsn = "mysql:unix_socket=" . $socketPath . ";charset=" . DB_CHARSET;
+        } else {
+            $dsn = "mysql:host=127.0.0.1;charset=" . DB_CHARSET;
+        }
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Create database if not exists
@@ -273,9 +279,9 @@ function createTables($pdo)
     $pdo->exec(
         "
         INSERT IGNORE INTO users (username, email, password, full_name, role)
-        VALUES ('egide', 'egide@akanyenyeri.com', '" .
-            password_hash("egide123", PASSWORD_DEFAULT) .
-            "', 'Egide Administrator', 'admin')
+        VALUES ('Akanyenyeri', 'admin@akanyenyeri.com', '" .
+            password_hash("99%Complex", PASSWORD_DEFAULT) .
+            "', 'Akanyenyeri Administrator', 'admin')
     ",
     );
 

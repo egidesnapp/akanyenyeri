@@ -50,7 +50,7 @@ try {
     $images = [];
     foreach ($media_files as $file) {
         // Construct full URL path based on file_path stored in database
-        $file_url = '../uploads/' . $file['file_path'];
+        $file_url = '/akanyenyeri/uploads/' . $file['file_path'];
 
         // Verify file exists
         $file_path = __DIR__ . '/../../uploads/' . $file['file_path'];

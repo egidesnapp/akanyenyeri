@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../database/config/database.php';
 // New Professional Website Design - Akanyenyeri Magazine
 $site_title = "Akanyenyeri Magazine - Modern News Platform";
 $site_description = "Breaking news, in-depth analysis, and compelling stories from around the world.";
@@ -20,27 +21,12 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Main CSS -->
+    <link href="<?php echo SITE_URL; ?>public/css/main.css" rel="stylesheet">
 
     <style>
+        /* Permanent Dark Theme */
         :root {
-            /* Light Theme (Default) */
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #f59e0b;
-            --dark-color: #0f172a;
-            --light-color: #f8fafc;
-            --text-color: #334155;
-            --border-color: #e2e8f0;
-            --bg-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --card-bg: white;
-            --hero-bg: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(30, 64, 175, 0.9) 100%),
-                      url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80');
-            --featured-bg: white;
-            --newsletter-bg: var(--light-color);
-        }
-
-        [data-theme="dark"] {
-            /* Dark Theme */
             --primary-color: #3b82f6;
             --secondary-color: #1d4ed8;
             --accent-color: #f59e0b;
@@ -66,15 +52,11 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
 
         /* Navigation */
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             padding: 1rem 0;
             transition: all 0.3s ease;
-        }
-
-        [data-theme="dark"] .navbar {
-            background: rgba(30, 41, 59, 0.95);
         }
 
         .navbar-brand {
@@ -88,10 +70,6 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             font-weight: 500;
             color: var(--text-color) !important;
             transition: color 0.3s ease;
-        }
-
-        html[data-theme="dark"] .nav-link {
-            color: #ffffff !important;
         }
 
         .nav-link:hover {
@@ -138,7 +116,7 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
         }
 
         .btn-custom {
-            background: var(--accent-color);
+            background: var(--primary-color);
             color: white;
             border: none;
             padding: 1rem 2rem;
@@ -150,7 +128,7 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
         }
 
         .btn-custom:hover {
-            background: #d97706;
+            background: var(--secondary-color);
             transform: translateY(-2px);
             color: white;
             text-decoration: none;
@@ -180,7 +158,7 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
 
         .btn-custom:hover {
             transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
         }
 
         .btn-outline-primary:hover, .btn-outline-success:hover, .btn-outline-info:hover,
@@ -191,9 +169,9 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
 
         /* Pulse animation for special buttons */
         @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
 
         .btn-custom:focus {
@@ -293,25 +271,131 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
         /* Footer */
         .footer {
             background: var(--dark-color);
-            color: white;
-            padding: 4rem 0 2rem;
+            color: var(--text-color);
+            padding: 2rem 0 1rem;
             margin-top: 3rem;
         }
 
-        .footer h5 {
-            color: white;
-            margin-bottom: 1.5rem;
+        .footer h5, .footer h6 {
+            color: var(--text-color);
+            margin-bottom: 0.75rem;
             font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .footer a {
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-color);
+            opacity: 0.8;
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
         }
 
         .footer a:hover {
             color: var(--accent-color);
+        }
+
+        /* New Compact Footer Styles */
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section:first-child {
+            flex: 0 0 250px;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .footer-links-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-links-horizontal a {
+            white-space: nowrap;
+        }
+
+        .footer-contact-compact {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-contact-compact p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .social-links-compact {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .social-links-compact .social-link {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-links-compact .social-link:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom-compact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+
+        .footer-legal-compact {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-legal-compact a {
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.6;
+            text-decoration: none;
         }
 
         .social-links a {
@@ -377,19 +461,20 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             to { opacity: 1; transform: translateX(0); }
         }
 
-        /* Loading Animation */
+        /* Loading Animation - Modern Star Animation */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             transition: opacity 0.5s ease, visibility 0.5s ease;
+            backdrop-filter: blur(10px);
         }
 
         .loading-overlay.hidden {
@@ -397,86 +482,98 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             visibility: hidden;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .star-loader {
+            position: relative;
+            width: 80px;
+            height: 80px;
         }
 
-        @keyframes spin {
+        .star {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: starRotate 2s ease-in-out infinite;
+        }
+
+        .star:before,
+        .star:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #fff700);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .star:after {
+            transform: rotate(180deg);
+            animation: starPulse 1.5s ease-in-out infinite alternate;
+        }
+
+        .star-orbit {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            animation: orbitRotate 3s linear infinite;
+        }
+
+        .star-orbit:before,
+        .star-orbit:after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #ffd700, #ffed4e);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        .star-orbit:before {
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .star-orbit:after {
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .loading-text {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes starRotate {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+        }
+
+        @keyframes starPulse {
+            0% { opacity: 0.7; transform: rotate(180deg) scale(0.9); }
+            100% { opacity: 1; transform: rotate(180deg) scale(1.1); }
+        }
+
+        @keyframes orbitRotate {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        /* Modern Theme Toggle Button */
-        .theme-toggle-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .theme-toggle-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50px;
-            width: 60px;
-            height: 30px;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .theme-toggle-btn:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            transform: scale(1.05);
-        }
-
-        .toggle-slider {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 26px;
-            height: 26px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border-radius: 50%;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-        }
-
-        [data-theme="dark"] .toggle-slider {
-            left: 32px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            box-shadow: 0 2px 8px rgba(30, 41, 59, 0.3);
-        }
-
-        .toggle-icon {
-            font-size: 12px;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .light-icon {
-            opacity: 1;
-        }
-
-        .dark-icon {
-            opacity: 0;
-            position: absolute;
-        }
-
-        [data-theme="dark"] .light-icon {
-            opacity: 0;
-        }
-
-        [data-theme="dark"] .dark-icon {
-            opacity: 1;
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+            100% { text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
         }
 
         /* Advertisement Styles */
@@ -587,22 +684,84 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             transform: scale(1.2);
         }
 
+        /* Enhanced Hero Section Styles */
+        .hero-custom-image {
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-custom-image img {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-custom-image img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-title {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: slideInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            animation: slideInUp 1s ease-out 0.3s both;
+        }
+
+        .hero-section .btn-custom {
+            animation: slideInUp 1s ease-out 0.6s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Typewriter effect for hero subtitle */
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--accent-color); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Animated Headings */
         .animated-heading {
             position: relative;
             overflow: hidden;
-            animation: headingGlow 3s ease-in-out infinite alternate;
-        }
-
-        .animated-heading::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: headingShine 4s linear infinite;
+            color: var(--text-color) !important;
         }
 
         .animated-heading::after {
@@ -612,24 +771,8 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             left: 0;
             width: 0;
             height: 2px;
-            background: currentColor;
+            background: var(--accent-color);
             animation: headingUnderline 3s ease-in-out infinite;
-        }
-
-        @keyframes headingGlow {
-            0% {
-                text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
-                transform: scale(1);
-            }
-            100% {
-                text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
-                transform: scale(1.02);
-            }
-        }
-
-        @keyframes headingShine {
-            0% { left: -100%; }
-            100% { left: 100%; }
         }
 
         @keyframes headingUnderline {
@@ -646,6 +789,12 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
         .article-title.animated-heading:hover {
             animation-play-state: paused;
             transform: translateY(-2px);
+        }
+
+        /* Load More Button Styles */
+        #loadMoreBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         /* Responsive */
@@ -671,6 +820,39 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
                 height: 10px;
             }
 
+            /* Footer responsive styles */
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .footer-section {
+                min-width: 100%;
+                text-align: center;
+            }
+
+            .footer-section:first-child {
+                flex: 1;
+            }
+
+            .footer-links-horizontal {
+                justify-content: center;
+            }
+
+            .social-links-compact {
+                justify-content: center;
+            }
+
+            .footer-bottom-compact {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+
+            .footer-legal-compact {
+                justify-content: center;
+            }
+
             .animated-heading {
                 animation-duration: 2s;
             }
@@ -678,11 +860,73 @@ $site_description = "Breaking news, in-depth analysis, and compelling stories fr
             .animated-heading::before {
                 animation-duration: 3s;
             }
+
+            /* Enhanced mobile hero section */
+            .hero-section {
+                padding: 6rem 0 4rem;
+            }
+
+            .hero-custom-image img {
+                max-height: 200px;
+            }
+
+            .hero-section .btn-custom {
+                font-size: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+
+            /* Disable typewriter effect on mobile for better performance */
+            .typewriter {
+                animation: none;
+                white-space: normal;
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-section {
+                padding: 5rem 0 3rem;
+            }
+
+            .hero-custom-image img {
+                max-height: 150px;
+            }
+
+            .hero-section .btn-custom {
+                font-size: 0.9rem;
+                padding: 0.7rem 1.2rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .hero-section {
+                padding: 4rem 0 2.5rem;
+            }
+
+            .hero-custom-image img {
+                max-height: 120px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
+    <!-- Loading Overlay - Modern Star Animation -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
+        <div class="star-loader">
+            <div class="star"></div>
+            <div class="star-orbit"></div>
+            <div class="loading-text">Loading</div>
+        </div>
     </div>

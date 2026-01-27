@@ -221,7 +221,7 @@ function handleUpload()
     logAction("media_uploaded", "Uploaded media file: {$file["name"]} to {$sub_dir}");
 
     // Return success response with file URL
-    $file_url = "../uploads/{$sub_dir}/" . $new_filename;
+    $file_url = "/akanyenyeri/uploads/{$sub_dir}/" . $new_filename;
     echo json_encode([
         "success" => true,
         "message" => "File uploaded successfully to {$sub_dir}",

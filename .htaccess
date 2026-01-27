@@ -1,3 +1,22 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /akanyenyeri/
+
+    # Redirect static pages to public folder
+    RewriteRule ^about$ public/about.php [L]
+    RewriteRule ^contact$ public/contact.php [L]
+    RewriteRule ^services$ public/services.php [L]
+    RewriteRule ^privacy$ public/privacy.php [L]
+    RewriteRule ^terms$ public/terms.php [L]
+    RewriteRule ^cookies$ public/cookies.php [L]
+
+    # Handle category pages
+    RewriteRule ^category/([^/]+)$ public/category.php?slug=$1 [L]
+
+    # Handle single post pages
+    RewriteRule ^([^/]+)$ public/single.php?slug=$1 [L]
+</IfModule>
+
 <IfModule mod_deflate.c>
     # Compress HTML, CSS, JavaScript, Text, XML and fonts
     AddOutputFilterByType DEFLATE text/plain
